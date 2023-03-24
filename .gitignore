@@ -1,3 +1,4 @@
 node_modules
-uploads/
-data/
+# ignore all files in data folder   
+data/*
+uploads/*
