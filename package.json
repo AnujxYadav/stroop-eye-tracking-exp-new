@@ -1,0 +1,27 @@
+{
+  "name": "stroop",
+  "version": "1.0.0",
+  "description": "Script copyright: 03-01-2021 Jason Steffener, Neurocognitive Mapping Laboratory",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ./app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.973.0",
+    "csv-writer": "^1.6.0",
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "json-2-csv": "^3.14.1",
+    "json2csv": "^5.0.6",
+    "multer": "^1.4.3",
+    "nodemailer": "^6.6.3",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12",
+    "request": "^2.88.2"
+  }
+}

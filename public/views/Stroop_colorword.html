@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="description" content="jsPsych Stroop Color/Word Task">
+    <meta name="keywords" content="HTML, CSS, JavaScript">
+    <meta name="author" content="Jason Steffener, NCMLab">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stroop Color/Word</title>
+
+
+    <script src="../../jspsych/jspsych.js"></script>
+    <script src="../../jspsych/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="../../jspsych/plugins/jspsych-image-keyboard-response.js"></script>
+    <script src="../../jspsych/plugins/jspsych-fullscreen.js"></script>
+    <script src="../../jspsych/plugins/jspsych-html-button-response.js"></script>
+    <script src="../../jspsych/plugins/jspsych-instructions.js"></script>
+    <script src="../views/Stroop_Setup_EN.js"></script>
+    <script src="../../jspsych/plugins/jspsych-webgazer-init-camera.js"></script>
+    <script src="../../jspsych/plugins/jspsych-survey-text.js"></script>
+    <script src="../../jspsych/plugins/jspsych-survey-likert.js"></script>
+
+    <script src="../../jspsych/plugins/jspsych-webgazer-validate.js"></script>
+    <script src="../../jspsych/plugins/jspsych-external-html.js"></script>
+    <script src="../../jspsych/plugins/jspsych-call-function.js"></script>
+    <script src="../../jspsych/plugins/jspsych-webgazer-calibrate.js"></script>
+    <script src="../../jspsych/examples/js/webgazer/webgazer.js"></script>
+    <script src="../../jspsych/extensions/jspsych-ext-webgazer.js"></script>
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <script src="../views/tmt.js"></script>
+
+    <script src="../../jspsych/plugins/jspsych-image-button-response.js"></script>
+    <script src="../../jspsych/plugins/jspsych-preload.js"></script>
+    <!-- <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"> -->
+    <link href="../../jspsych/css/jspsych.css" rel="stylesheet" type="text/css">
+    <script src="../saver/fileSaver.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <?php include 'save_data.php';?>
+    <link href="../css/Stroop.css" rel="stylesheet">
+    <style>
+      .stimulus {
+        font-size: StimulusFontSize;
+      }
+    </style>
+  </head>
+
+  <body>
+    <video controls id="default"></video>
+    <video id="screen-video" controls></video>
+  </body>
+  <script>
+    /*<?php 
+      $post_data = json_decode(file_get_contents('php://input'), true);   
+      // the directory "data" must be writable by the server  
+      $name = "data/".$post_data['filename'].".csv";  
+      $data = $post_data['filedata']; 
+      // write the file to disk 
+      file_put_contents($name, $data);  
+      ?>*/
+
+    var init_camera = {
+      type: "webgazer-init-camera", // what's with the extra width  
+    };
+    var overview = {
+      type: 'image-button-response',
+      stimulus: '../../assets/images/overview.png',
+      choices: ['continue'],
+      prompt: "<p>You'll see detailed instructions ahead. Press continue to proceed.</p>"
+    };
+
+
+    var scale_1 = [
+      "Yes"
+    ];
+
+    var likert_page = {
+      type: 'survey-likert',
+      questions: [
+        { prompt: "Does your system have a working webcam?", name: 'Webcam', labels: scale_1, required: true },
+        { prompt: "Is your room sufficiently lit with the light being in front of your face rather than back?", name: 'Light', labels: scale_1, required: true },
+        { prompt: "You voluntarily participate in this study and have already signed the consent form.", name: 'Consent', labels: scale_1, required: true },
+
+      ],
+      preamble: '<h1>Before you proceed</h1>',
+      randomize_question_order: false
+    };
+
+    var validation = {
+      type: "webgazer-calibrate",
+      randomize_calibration_order: true,
+      repetitions_per_point: 1,  //back to 2  
+    };
+    var survey_page1 = {
+      type: 'survey-text',
+      questions: [
+        { prompt: 'Name : ', columns: 50, name: 'firstname' },
+        { prompt: 'Age : ', columns: 3, name: 'Age', required: true },
+        { prompt: "Gender", placeholder: ' M/F', columns: 15, name: 'Gender', required: true },
+        { prompt: "Have you taken this test before?", placeholder: 'type Yes/No', columns: 15, name: 'prior_practice' },
+        { prompt: "Do you have any pre condition (such as ADHD, ASD, Autism, Dyslexia, other Learning Disabilities etc.)", placeholder: 'type Yes/No', columns: 15, name: 'Medical_history', required: true },
+        { prompt: "If yes, please mention about it", placeholder: 'ADHD/ ASD/ Autism/ Dyslexia/ Other Learning Disabilities/ Prefer not to say', columns: 70, name: 'Medical_history_2' },
+      ],
+      preamble: '<h1>Basic information</h1>',
+      on_finish: function (data) {
+
+        // Generating new subject id
+        console.log(data)
+        var subject_id = jsPsych.randomization.randomID(15);
+        var name = jsPsych.data.get().select('response')['values'][2]['firstname'];
+        subject_id = name + "_" + subject_id.toString();
+        console.log(subject_id)
+        jsPsych.data.addProperties({
+          subject: subject_id
+        });
+
+      }
+    };
+
+
+    var instructions_cal = {
+      type: 'html-button-response',
+      stimulus: '<div style="width: 800px;border: thin solid #0000FF ; border-radius: 10px ;">' +
+        `
+		<ul>
+		<li style="text-align:left; padding:8px; font-size: 18px">    Now we will calibrate the web gazer.</li>
+		<li style="text-align:left; padding:8px; font-size: 18px">It will take 2-3 minutes.</li>
+		<li style="text-align:left; padding:8px; font-size: 18px">On the next screen you will see a sequence of black dots. There will be 20 of them.</li>
+		<li style="text-align:left; padding:8px; font-size: 18px">Keep your head steady and look at each dot for atleast 3 seconds, then click the dot.</li>
+		</ul>`
+
+        +
+        '</div>',
+      choices: ["Continue"],
+
+    }
+
+    var validation_instructions = {
+      type: 'html-button-response',
+      stimulus: `<div style="width: 800px;border: thin solid #0000FF ; border-radius: 10px ;">
+		<p>Let's see how accurate the eye tracking is. </p>
+		<p>Keep your head still, and move your eyes to focus on each dot as it appears.</p>
+		<p>You do not need to click on the dots. Just move your eyes to look at the dots.</p>
+		`,
+      choices: ['Click to begin'],
+      post_trial_gap: 1000
+    }
+
+    var validate = {
+      type: 'webgazer-validate',
+      validation_points: [[25, 25], [25, 75], [75, 25], [75, 75]],
+      show_validation_data: true,
+      on_finish: function () {
+        // jsPsych.extensions["webgazer"].pause();
+        jsPsych.extensions["webgazer"].hidePredictions();
+      },
+    }
+
+    /* create timeline */
+    var timeline = [];
+
+    // Make experiment run in full screen mode
+    timeline.push({
+      type: 'fullscreen',
+      fullscreen_mode: true,
+    });
+    timeline.push(overview);
+    timeline.push(likert_page);
+    var val = {
+      timeline: [validation],
+      repetitions: 2 // change it back to 2 
+    };
+
+    // timeline.push(preload);
+    timeline.push(survey_page1);
+
+    timeline.push(init_camera);
+    timeline.push({
+      type: 'fullscreen',
+      fullscreen_mode: true,
+    });
+    timeline.push(instructions_cal);
+    timeline.push(val);
+    timeline.push(validation_instructions);
+    timeline.push(validate);
+
+
+
+
+    var preload = {
+      type: 'preload',
+      auto_preload: true,
+      images: ["../../assets/images/st_instructions.png", "../../assets/images/on_trial.png"]
+    };
+
+    var start_stroop = {
+      type: 'html-button-response',
+      stimulus: '<div style="width: 800px; padding: 50px; border-radius: 10px ;background-color: #eaf4f4">' + '<p style="font-size:20px">Welcome to the Task 1:</p>' + '<h1>Stroop Color/Word</h1>',
+      choices: ["Continue"],
+    }
+
+    /* Create the initial welcome and instructions for practice. 
+    This uses the built in instructions module. Make sure it gets imported above */
+    var ColorWordInstr = {
+      type: 'instructions',
+      pages: ColorWordInstrText,
+      show_clickable_nav: true,
+      on_start: function () {
+        var e = document.getElementById("jspsych-content");
+        e.style.border = "thin solid #0000FF";
+        // e.style.backgroundColor = "#eaf4f4"
+        e.style.borderRadius = "10px";
+        e.style.padding = "10px";
+        // border: thin solid #0000FF ; border-radius: 10px ; padding: 10px
+      },
+      on_finish: function () {
+        var e = document.getElementById("jspsych-content");
+        e.style.border = "thin solid #FFFFFF";
+        e.style.backgroundColor = "#FFFFFF"
+        e.style.borderRadius = "0px";
+        e.style.padding = "0px";
+        // border: thin solid #0000FF ; border-radius: 10px ; padding: 10px
+      }
+    }
+    /* After practice is completed the performance is being checked. If accuracy is below 50% then the practice is repeated.  
+    These are the instructions stating that practice will be repeated. */
+    var ColorWordPoorPerfInstr = {
+      type: 'instructions',
+      pages: ColorWordInstrPoorPerformanceText,
+      show_clickable_nav: true
+    }
+    /* Instructions shown to participants before test trials begin. */
+    var ColorWordTestInstr = {
+      type: 'instructions',
+      pages: ColorWordTestInstrText,
+      show_clickable_nav: true,
+      on_start: function () {
+        var e = document.getElementById("jspsych-content");
+        e.style.border = "thin solid #0000FF";
+        // e.style.backgroundColor = "#eaf4f4"
+        e.style.borderRadius = "10px";
+        e.style.padding = "10px";
+        // border: thin solid #0000FF ; border-radius: 10px ; padding: 10px
+      },
+      on_finish: function () {
+        var e = document.getElementById("jspsych-content");
+        e.style.border = "thin solid #FFFFFF";
+        e.style.backgroundColor = "#FFFFFF"
+        e.style.borderRadius = "0px";
+        e.style.padding = "0px";
+        // border: thin solid #0000FF ; border-radius: 10px ; padding: 10px
+      }
+    }
+
+
+    var stroop_end = {
+      type: "html-keyboard-response",
+      stimulus: '<div style="width: 800px;">' +
+        '<p>Well done!!.</p>' +
+        ' <p>Press any key to move to Task-2 ..</p>' +
+        '</div>',
+      choices: jsPsych.ALL_KEYS
+    }
+
+    var min_divWidth = -1000
+    var max_divWidth = 1000
+    var min_divHeight = -380
+    var max_divHeight = 380
+
+
+
+    var Stimulus = {
+      type: 'html-keyboard-response',
+      stimulus: function () {
+        n1 = Math.floor(Math.random() * (max_divHeight - min_divHeight) + min_divHeight)
+        n2 = Math.floor(Math.random() * (max_divWidth - min_divWidth) + min_divWidth)
+        s1 = n1.toString()
+        s2 = n2.toString()
+        //console.log(n1,n2)
+        t1 = "margin-top:" + s1 + "px ; margin-left:" + s2 + "px"
+        t1 = t1.toString()
+
+
+        var Stim = '<div style = "' + t1 + '" ><p class="stimulus" style="color:rgb' + jsPsych.timelineVariable('Color', true) + ';font-size:70px;">' + jsPsych.timelineVariable('Word', true) + '</p>'
+        //var temp = PutIntoTable('',Stim)  
+        return Stim;
+        //return '<p class="stimulus" style="color:rgb'+jsPsych.timelineVariable('Color', true)+';">' +jsPsych.timelineVariable('Word', true)+'</p>';   
+      },
+      choices: ['ArrowLeft', 'ArrowDown', 'ArrowRight'],
+      post_trial_gap: 0,
+      trial_duration: 3000,
+      response_ends_trial: true,
+      extensions: [
+        {
+          type: "webgazer",
+          params: {
+            targets: ["#jspsych-html-keyboard-response-stimulus"],
+          },
+        },
+      ],
+      // on_finish: function(data){ 
+      //   data.correct = data.key_press == jsPsych.pluginAPI.convertKeyCharacterToKeyCode(data.response);  
+      //   console.log(data.correct); 
+      //    If the ESCAPE key is pressed the current timeline is ended and the thank you screen is shown  
+      //   if (data.key_press == 27) {  
+      //     //jsPsych.endCurrentTimeline();  
+      //     jsPsych.end(); 
+      //   }  
+      // }, 
+      on_finish: function (data) {
+        var correct_response = data.letter;
+        console.log(data.response, data.letter);
+        data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.letter);
+      }
+    }
+
+
+
+
+    // New stationary Stimulus for practice trials
+
+    var prac_Stimulus = {
+      type: 'html-keyboard-response',
+      stimulus: function () {
+        var Stim = '<p class="stimulus" style="color:rgb' + jsPsych.timelineVariable('Color', true) + ';">' + jsPsych.timelineVariable('Word', true) + '</p>';
+        var temp = PutIntoTable('', Stim)
+        return temp;
+      },
+      choices: ['ArrowLeft', 'ArrowDown', 'ArrowRight'],
+      post_trial_gap: 0,
+      trial_duration: 3000,
+      response_ends_trial: true,
+      extensions: [
+        {
+          type: "webgazer",
+          params: {
+            targets: ["#jspsych-html-keyboard-response-stimulus"],
+          },
+        },
+      ],
+
+      on_finish: function (data) {
+        var correct_response = data.letter;
+        console.log(data.response, data.letter);
+        data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.letter);
+      }
+    }
+
+    var prac_stimulus = Object.assign({}, prac_Stimulus)
+
+    prac_stimulus = Object.assign(prac_stimulus, {
+      data: {
+        Congruency: jsPsych.timelineVariable('Congruency'),
+        letter: jsPsych.timelineVariable('letter'),
+        type: 'practice trial'
+      }
+    })
+    var test_stimulus = Object.assign({}, Stimulus)
+    test_stimulus = Object.assign(test_stimulus, {
+      data: {
+        Congruency: jsPsych.timelineVariable('Congruency'),
+        letter: jsPsych.timelineVariable('letter'),
+        type: 'test trial'
+      }
+    })
+
+    // Without image fixation
+
+    var test_fixation = {
+      type: 'html-keyboard-response',
+      stimulus: function () {
+        return '<div style="font-size:60px;">+</div><p><p>';
+      },
+
+
+      choices: jsPsych.NO_KEYS,
+      trial_duration: function () {
+        return jsPsych.randomization.sampleWithoutReplacement([250, 500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
+      },
+      data: { type: 'fixation' }
+    }
+
+
+    var fixation = {
+      type: 'html-keyboard-response',
+      stimulus: function () {
+        var temp = PutIntoTable('', '+')
+        return temp;
+      },
+
+      //return '<div style="font-size:60px;">+</div><p><p><img src="StroopColorsKeyboard.png" style="position:relative; bottom:-200px">'},  
+      choices: jsPsych.NO_KEYS,
+      trial_duration: function () {
+        return jsPsych.randomization.sampleWithoutReplacement([250, 500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
+      },
+      data: { type: 'fixation' }
+    }
+    /* ARROWS 37 = left, 38 = up, 39 = right, 40 = down */
+    /* Escape = 27 */
+    var feedback = {
+      type: 'html-keyboard-response',
+      trial_duration: FeedbackLength,
+      stimulus: function () {
+        var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct;
+        if (last_trial_correct) {
+          var temp = PutIntoTable('', 'Correct!')
+          return temp;
+        } else {
+          var temp = PutIntoTable('', 'Incorrect')
+          return temp;;
+        }
+      }
+    }
+    // Define a practice procedure which provides feedback  
+    var practice_procedure = {
+      timeline: [fixation, prac_stimulus, feedback],
+      timeline_variables: StroopColorWordList,
+      sample: {
+        type: 'fixed-repetitions',
+        size: ColorWordPracticeRepeats,
+      },
+      on_start: function () {
+        jsPsych.extensions["webgazer"].resume();
+        jsPsych.extensions["webgazer"].showPredictions();
+      },
+    }
+    // Define the test procedure which does NOT provide feedback  
+    var test_procedure = {
+      timeline: [test_fixation, test_stimulus],
+      timeline_variables: StroopColorWordList,
+      sample: {
+        type: 'fixed-repetitions',
+        size: ColorWordTestRepeats,
+      }
+    }
+    // Prepare debriefing for after the practice trials 
+    var debrief = {
+      type: "html-keyboard-response",
+      stimulus: function () {
+        var DataFromThisPracticeRun = jsPsych.data.get().filter({ type: 'practice trial' }).last(16 * ColorWordPracticeRepeats)
+        var total_trials = DataFromThisPracticeRun.count();
+        var NumberCorrect = DataFromThisPracticeRun.filter({ correct: true }).count()
+        var accuracy = Math.round(NumberCorrect / total_trials * 100);
+        /*var congruent_rt = Math.round(jsPsych.data.get().filter({correct: true, Congruency: 'Con'}).select('rt').mean()); 
+        var incongruent_rt = Math.round(jsPsych.data.get().filter({correct: true, Congruency: 'Incon'}).select('rt').mean());*/
+        return "<p>You responded correctly on <strong>" + accuracy + "%</strong> of the " + total_trials + " trials.</p> " +
+          /*"<p>Your average response time for congruent trials was <strong>" + congruent_rt + "ms</strong>.</p>"+  
+          "<p>Your average response time for incongruent trials was <strong>" + incongruent_rt + "ms</strong>.</p>"+*/
+          "<p>Press any key to continue.</p>";
+      }
+    };
+    // This a conditional block which checks to see if the performance during practice was good enough  
+    // if performance on the practice is above 50% accurate then the test procedure is done.  
+    // otherwise practice is done again 
+    var if_node = {
+      timeline: [ColorWordPoorPerfInstr, practice_procedure],
+      conditional_function: function () {
+        // check performance on the practice  
+        var DataFromThisPracticeRun = jsPsych.data.get().filter({ type: 'practice trial' }).last(16 * ColorWordPracticeRepeats)
+        var total_trials = DataFromThisPracticeRun.count();
+        var NumberCorrect = DataFromThisPracticeRun.filter({ correct: true }).count()
+        var accuracy = Math.round(NumberCorrect / total_trials * 100);
+        if (accuracy < 50) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+
+    timeline.push(start_stroop);
+    timeline.push(ColorWordInstr);
+    // run the practice trials  
+    timeline.push(practice_procedure);
+    // provide feedback as to their performance 
+    timeline.push(debrief);
+    // decide if the person did well enough 
+    timeline.push(if_node);
+    // decide if the person did well enough 
+    //timeline.push(if_node); 
+    // Present test instructions  
+    timeline.push(ColorWordTestInstr);
+    // run the test 
+    timeline.push(test_procedure);
+    timeline.push(stroop_end);
+
+
+
+
+    let constraintObj = {
+      audio: false,
+      video: {
+        facingMode: "user",
+        width: { min: 640, ideal: 1280, max: 1920 },
+        height: { min: 480, ideal: 720, max: 1080 },
+      },
+    };
+    // width: 1280, height: 720  -- preference only 
+    // facingMode: {exact: "user"}  
+    // facingMode: "environment"  
+    //handle older browsers that might implement getUserMedia in some way 
+    if (navigator.mediaDevices === undefined) {
+      navigator.mediaDevices = {};
+      navigator.mediaDevices.getUserMedia = function (constraintObj) {
+        let getUserMedia =
+          navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+        if (!getUserMedia) {
+          return Promise.reject(
+            new Error("getUserMedia is not implemented in this browser")
+          );
+        }
+        return new Promise(function (resolve, reject) {
+          getUserMedia.call(navigator, constraintObj, resolve, reject);
+        });
+      };
+    } else {
+      navigator.mediaDevices
+        .enumerateDevices()
+        .then((devices) => {
+          devices.forEach((device) => {
+            console.log(device.kind.toUpperCase(), device.label);
+            //, device.deviceId 
+          });
+        })
+        .catch((err) => {
+          console.log(err.name, err.message);
+        });
+    }
+    let screenMediaRecorder;
+    navigator.mediaDevices.getDisplayMedia({ video: true }).then(function (screenStream) {
+      // Connect the screen stream to the video element
+      let screenVideo = document.getElementById("screen-video");
+      if ("srcObject" in screenVideo) {
+        screenVideo.srcObject = screenStream;
+      } else {
+        screenVideo.src = window.URL.createObjectURL(screenStream);
+      }
+      screenVideo.onloadedmetadata = function (ev) {
+        console.log("Screen stream is playing");
+        screenVideo.play();
+      };
+
+      // Start recording the screen stream
+      screenMediaRecorder = new MediaRecorder(screenStream);
+      let screenChunks = [];
+      screenMediaRecorder.start();
+      console.log(screenMediaRecorder.state);
+
+      screenMediaRecorder.ondataavailable = function (ev) {
+        screenChunks.push(ev.data);
+        console.log(screenChunks);
+      };
+
+      screenMediaRecorder.onstop = (ev) => {
+        let screenBlob = new Blob(screenChunks, { type: "video/mp4;" });
+        screenChunks = [];
+
+        var screenFd = new FormData();
+        screenFd.append("fname", "screen-video.mp4");
+        screenFd.append("file", screenBlob);
+        $.ajax({
+          type: "POST",
+          enctype: "multipart/form-data",
+          url: "/video_data",
+          data: screenFd,
+          processData: false,
+          contentType: false,
+          cache: false,
+          timeout: 600000,
+          success: function (response) {
+            console.log("Screen video saved at server successfully!");
+          },
+          error: function (e) {
+            console.log("ERROR : ", e);
+          },
+        });
+      };
+    }).catch(function (err) {
+      console.log("Error: " + err);
+    });
+
+    navigator.mediaDevices
+      .getUserMedia(constraintObj)
+      .then(function (mediaStreamObj) {
+        //connect the media stream to the first video element 
+        let video = document.getElementById("default");
+        if ("srcObject" in video) {
+          video.srcObject = mediaStreamObj;
+        } else {
+          //old version 
+          video.src = window.URL.createObjectURL(mediaStreamObj);
+        }
+        video.onloadedmetadata = function (ev) {
+          //show in the video element what is being captured by the webcam  
+          //video.play();
+          console.log("Video Recording!");
+        };
+        //add listeners for saving video/audio  
+        //let start = document.getElementById("btnStart");  
+        //let stop = document.getElementById("btnStop");  
+        //let vidSave = document.getElementById("vid2");  
+        let mediaRecorder = new MediaRecorder(mediaStreamObj);
+        let chunks = [];
+        mediaRecorder.start();
+        console.log(mediaRecorder.state);
+        // stop.addEventListener("click", (ev) => { 
+        //   mediaRecorder.stop();  
+        // });  
+        mediaRecorder.ondataavailable = function (ev) {
+          chunks.push(ev.data);
+          console.log(chunks);
+        };
+        mediaRecorder.onstop = (ev) => {
+          let blob = new Blob(chunks, { type: "video/mp4;" });
+          chunks = [];
+          // let videoURL = window.URL.createObjectURL(blob); 
+          // vidSave.src = videoURL;  
+
+          //local save
+          // var filename = "data_video.mp4";  
+          // console.log(blob);  
+          // saveAs(blob, filename); 
+          // // Need to save this on Server. 
+          // console.log("File saved Locally"); 
+
+          //var data = new FormData();
+          //data.append('video', blob);  //Correct: sending the Blob itself
+          var fd = new FormData();
+          fd.append('fname', 'test.webm');
+          fd.append('file', blob);
+          $.ajax({
+            type: "POST",
+            enctype: 'multipart/form-data',
+            url: "/video_data",
+            data: fd,
+            processData: false,
+            contentType: false,
+            cache: false,
+            timeout: 600000,
+            success: function (response) {
+              alert("Video saved at server successfully!")
+              window.location.href = "/report";
+
+
+            },
+            error: function (e) {
+              console.log("ERROR : ", e);
+            }
+          });
+        };
+
+
+
+        ////////////////////////////////////////////////////////////////////////////  
+        ////////////////////////////////////////////////////////////////////////////  
+
+        //timeline.push(trial)  
+
+        var n_back_set = ['Z', 'X', 'C', 'V', 'B', 'N'];
+        var sequence = [];
+        var prac_sequence = [];
+        var how_many_back = 1;
+        var prac_sequence_length = 10;
+        var sequence_length = 20;
+        /* Instructions */
+
+        var start_cpt = {
+          type: 'html-button-response',
+          stimulus: '<div style="width: 800px; padding: 50px; border-radius: 10px ;background-color: #fff1f1">' + '<p style="font-size:20px">Welcome to the Task 2:</p>' + '<h1>Continuous Performance Task</h1>',
+          choices: ["Continue"],
+        }
+
+        timeline.push(start_cpt);
+
+        var instructions_1 = {
+          type: 'html-button-response',
+          stimulus: '<div style="width: 800px;border: thin solid #ec7b7b ; border-radius: 10px ; padding: 10px">' +
+            '<p>This task will test your ability to hold information in short-term, temporary memory.</p>' + '<p>This is called working memory.</p>' +
+            '</div>',
+          choices: ["Continue"]
+        }
+        timeline.push(instructions_1);
+
+
+        var instructions_2 = {
+          type: 'html-button-response',
+          stimulus: '<div style="width: 800px;border: thin solid #ec7b7b ; border-radius: 10px ; padding: 10px">' +
+            `
+        	<ol>
+        	<li style="text-align:left; padding:8px; font-size: 18px">You will see a sequence of letters presented one at a time. Your task is to determine if the letter on the screen is the same that appeared on the last screen.</li>
+        	<li style="text-align:left; padding:8px; font-size: 18px">If the letter is a match <span style="font-weight: bold;">press the M key.</li>
+        	<li style="text-align:left; padding:8px; font-size: 18px">For example, if you saw the sequence X, C, C, B, B, X you would press the M key when the second C appeared and similarly when the second B appeared on the screen.</li>
+        	<li style="text-align:left; padding:8px; font-size: 18px">You do not need to press any key when there is not a match.</li>
+        	</ol>`
+            +
+            '</div>',
+          choices: ["Continue"]
+        }
+        timeline.push(instructions_2);
+        var instructions_3 = {
+          type: 'html-button-response',
+          stimulus: '<div style="width: 800px;border: thin solid #ec7b7b ; border-radius: 10px ;padding: 10px">' +
+            '<p>The sequence will begin on the next screen.</p>' +
+            '<p>This is a practice trial. Lets see how focused you are.</p>' +
+            '<p>Remember: press the M key if a letter appears on simultaneous screens.</p>' +
+            '</div>',
+          choices: ["I'm ready to start!"],
+          post_trial_gap: 1000
+        }
+        timeline.push(instructions_3);
+
+
+
+
+
+
+        // Setting up the practice sequence
+
+        var prac_n_back_trial = {
+          type: 'html-keyboard-response',
+          stimulus: function () {
+            if (prac_sequence.length < how_many_back) {
+              var letter = jsPsych.randomization.sampleWithoutReplacement(n_back_set, 1)[0]
+            } else {
+              if (jsPsych.timelineVariable('match', true) == true) {
+                var letter = prac_sequence[prac_sequence.length - how_many_back];
+              } else {
+                var possible_letters = jsPsych.randomization.sampleWithoutReplacement(n_back_set, 2);
+                if (possible_letters[0] != prac_sequence[prac_sequence.length - how_many_back]) {
+                  var letter = possible_letters[0];
+                } else {
+                  var letter = possible_letters[1];
+                }
+              }
+            }
+            prac_sequence.push(letter);
+
+            return '<div style = "centre" ><span style="font-size: 96px;">' + letter + '</span></div>'
+            //'<div style = "margin-top:100px ; margin-left:200px" ><span style="font-size: 96px;">'+letter+'</span></div>'
+          },
+          choices: ['M'],
+          trial_duration: 1500,
+          response_ends_trial: false,
+          post_trial_gap: 500,
+          extensions: [
+            {
+              type: "webgazer",
+              params: {
+                targets: ["#jspsych-html-keyboard-response-stimulus"],
+              },
+            },
+          ],
+          data: {
+            phase: 'Practice',
+            match: jsPsych.timelineVariable('match')
+          },
+          on_finish: function (data) {
+            if (data.match == true) {
+              data.correct = (data.response != null)
+            }
+            if (data.match == false) {
+              data.correct = (data.response === null)
+            }
+          }
+        }
+
+        var prac_n_back_trials = [
+          { match: true },
+          { match: false }
+        ]
+
+
+        var prac_n_back_sequence = {
+          timeline: [prac_n_back_trial],
+          timeline_variables: prac_n_back_trials,
+          sample: {
+            type: 'with-replacement',
+            size: prac_sequence_length,
+            weights: [1, 2]
+          }
+        }
+
+
+        var prac_feedback = {
+          type: 'html-button-response',
+          stimulus: function () {
+            var test_trials = jsPsych.data.get().filter({ phase: 'Practice' }).last(prac_sequence_length - 1);
+            var n_match = test_trials.filter({ match: true }).count();
+            var n_nonmatch = test_trials.filter({ match: false }).count();
+            var n_correct = test_trials.filter({ match: true, correct: true }).count();
+            var false_alarms = test_trials.filter({ match: false, correct: false }).count();
+            var html = "<div style='width:800px;'>" +
+              "<p>All done!</p>" +
+              "<p>You correctly identified " + n_correct + " of the " + n_match + " matching items.</p>" +
+              "<p>You incorrectly identified " + false_alarms + " of the " + n_nonmatch + " non-matching items as matches.</p>" +
+              "<strong>Let's move to the actual test.</strong>" +
+              "<p style = 'color:rgb(255,150,100)'>Words might appear anywhere on the screen</p>"
+
+
+            return html;
+          },
+          choices: ["I'm ready to start!"]
+        }
+
+
+
+        timeline.push(prac_n_back_sequence);
+        timeline.push(prac_feedback);
+
+
+
+        /* N Back sequence trials */
+
+        var min_divWidth = -1000
+        var max_divWidth = 1000
+        var min_divHeight = -380
+        var max_divHeight = 380
+        var n_back_trial = {
+          type: 'html-keyboard-response',
+          stimulus: function () {
+            if (sequence.length < how_many_back) {
+              var letter = jsPsych.randomization.sampleWithoutReplacement(n_back_set, 1)[0]
+            } else {
+              if (jsPsych.timelineVariable('match', true) == true) {
+                var letter = sequence[sequence.length - how_many_back];
+              } else {
+                var possible_letters = jsPsych.randomization.sampleWithoutReplacement(n_back_set, 2);
+                if (possible_letters[0] != sequence[sequence.length - how_many_back]) {
+                  var letter = possible_letters[0];
+                } else {
+                  var letter = possible_letters[1];
+                }
+              }
+            }
+            sequence.push(letter);
+            n1 = Math.floor(Math.random() * (max_divHeight - min_divHeight) + min_divHeight)
+            n2 = Math.floor(Math.random() * (max_divWidth - min_divWidth) + min_divWidth)
+            s1 = n1.toString()
+            s2 = n2.toString()
+            //console.log(n1,n2)
+            t1 = "margin-top:" + s1 + "px ; margin-left:" + s2 + "px"
+            t1 = t1.toString()
+            return '<div style = "' + t1 + '" ><span style="font-size: 96px;">' + letter + '</span></div>'
+            //'<div style = "margin-top:100px ; margin-left:200px" ><span style="font-size: 96px;">'+letter+'</span></div>'
+          },
+          choices: ['M'],
+          trial_duration: 1500,
+          response_ends_trial: false,
+          post_trial_gap: 500,
+          extensions: [
+            {
+              type: "webgazer",
+              params: {
+                targets: ["#jspsych-html-keyboard-response-stimulus"],
+              },
+            },
+          ],
+
+          data: {
+            phase: 'test',
+            match: jsPsych.timelineVariable('match')
+          },
+          on_finish: function (data) {
+            if (data.match == true) {
+              data.correct = (data.response != null)
+            }
+            if (data.match == false) {
+              data.correct = (data.response === null)
+            }
+          }
+        }
+        var n_back_trials = [
+          { match: true },
+          { match: false }
+        ]
+        var n_back_sequence = {
+          timeline: [n_back_trial],
+          timeline_variables: n_back_trials,
+          sample: {
+            type: 'with-replacement',
+            size: sequence_length,
+            weights: [1, 2]
+          }
+        }
+        timeline.push(n_back_sequence);
+        /* feedback */
+        var feedback = {
+          type: 'html-keyboard-response',
+          stimulus: function () {
+            var test_trials = jsPsych.data.get().filter({ phase: 'test' }).last(sequence_length - 1);
+            var n_match = test_trials.filter({ match: true }).count();
+            var n_nonmatch = test_trials.filter({ match: false }).count();
+            var n_correct = test_trials.filter({ match: true, correct: true }).count();
+            var false_alarms = test_trials.filter({ match: false, correct: false }).count();
+            var html = "<div style='width:800px;'>" +
+              "<p>All done!</p>" +
+              "<p>You correctly identified " + n_correct + " of the " + n_match + " matching items.</p>" +
+              "<p>You incorrectly identified " + false_alarms + " of the " + n_nonmatch + " non-matching items as matches.</p>" +
+              "<p>Please press any key to proceed"
+
+            return html;
+          },
+          choices: jsPsych.ALL_KEYS
+        }
+        timeline.push(feedback);
+
+
+
+        //////////////////////////////////////////////////////////
+
+        var start_tmt = {
+          type: 'html-button-response',
+          stimulus: '<div style="width: 800px; padding: 50px; border-radius: 10px ;background-color: #cfffc1">' + '<p style="font-size:20px">Welcome to the Task 3:</p>' + '<h1>Trail-Making Task</h1>',
+          choices: ["Continue"],
+        }
+
+        //    timeline.push(start_cpt);
+
+        var instructions_tmt_1 = {
+          type: 'html-button-response',
+          stimulus: '<div style="width: 800px;">' +
+            '<p>Please continue to head towards the last task of the study </p>' +
+            '</div>',
+          choices: ["Continue"]
+        }
+
+        var instructions_tmt_2 = {
+          type: 'html-button-response',
+          stimulus: '<div style="width: 800px;border: thin solid #65dc7f ; border-radius: 10px ;">' +
+
+            `
+    	<ul>
+    	<li style="text-align:left; padding:8px; font-size: 18px">    On the next screen you will see bubbles with a character written in them.</li>
+    	<li style="text-align:left; padding:8px; font-size: 18px">Click on the bubbles starting from 1.</li>
+    	<li style="text-align:left; padding:8px; font-size: 18px">You need to make the trail pattern 1-A-2-B-3-C-4-D.......</li>
+
+    	</ul>`
+
+            +
+            '</div>',
+          choices: ["Continue"]
+        }
+
+
+
+        var grid_rows = 10;
+        var grid_cols = 21;
+        var square_size = 50;
+
+        var grid = [];
+        var locations = [];
+        var arr = [];
+        for (var i = 0; i < grid_cols; i++) {
+          arr.push(i);
+        }
+        for (var i = 0; i < grid_rows; i++) {
+          grid.push([]);
+
+          for (var j = 0; j < grid_cols; j++) {
+
+            grid[i].push(0);
+            // if(i>0 && i < grid_rows-1 && j > 0 && j < grid_cols - 1){
+            //   locations.push([i,j]);
+            // }
+          }
+        }
+
+        char_per_row = 3
+        let element_locs = new Map()
+        var elements = [1, "A", 2, "B", 3, "C", 4, "D", 5, "E", 6, "F", 7, "G", 8, "H", 9, "I", 10, "J", 11, "K", 12, "L", 13, "M", 14, "N", 15, "O"]
+        var shuffledArray = jsPsych.randomization.repeat(elements, 1);
+        for (var i = 0; i < grid_rows; i++) {
+          var sample = jsPsych.randomization.sampleWithoutReplacement(arr, char_per_row);
+          var heh = jsPsych.randomization.sampleWithoutReplacement(elements, char_per_row);
+          heh = shuffledArray.slice(i * char_per_row, char_per_row * i + char_per_row);
+          console.log(heh);
+          for (var j = 0; j < 4; j++) {
+            grid[i][sample[j]] = heh[j];
+            element_locs.set(heh[j], [i, sample[j]]);
+
+            if (i > 0 && i < grid_rows - 1 && sample[j] > 0 && sample[j] < grid_cols - 1) {
+              locations.push([i, sample[j]])
+            }
+          }
+        }
+        console.log(grid)
+        console.log(locations)
+        console.log(element_locs)
+
+
+        var last_predictor = null;
+        var last_target = null;
+        var colors = ["#aaf300"];
+        var deltas = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+        var order = [0, 1, 2, 3, 4, 5, 6, 7];
+        order = jsPsych.randomization.shuffle(order);
+        var current_idx = -1;
+
+
+
+        function getNextPredictor () {
+
+          current_idx++;
+          //console.log(current_idx)
+          if (current_idx >= elements.length) {
+            order = jsPsych.randomization.shuffle(order);
+            current_idx = 0;
+          }
+          var predictor = jsPsych.randomization.sampleWithoutReplacement(locations, 1)[0];
+          if (last_target !== null) {
+            while (predictor[0] == last_target[0] && predictor[1] == last_target[1]) {
+              predictor = jsPsych.randomization.sampleWithoutReplacement(locations, 1)[0];
+            }
+          }
+          last_predictor = predictor;
+          //console.log(predictor)
+          //console.log(elements[current_idx])
+          //console.log(element_locs.has(1))
+          //console.log(predictor)
+
+          predictor = element_locs.get(elements[current_idx])
+          var s = grid[predictor[0]][predictor[1]]
+          if (typeof s === 'string') {
+            grid[predictor[0]][predictor[1]] = s.toLowerCase();
+          }
+          else {
+            grid[predictor[0]][predictor[1]] = -1 * grid[predictor[0]][predictor[1]]
+          }
+          console.log(s)
+          //grid[predictor[0]][predictor[1]] = s.toLowerCase()
+          return predictor;
+        }
+
+
+        function getNextTarget () {
+          var target = last_predictor.slice();
+          var d = deltas[order[current_idx]];
+          target[0] = target[0] + d[0];
+          target[1] = target[1] + d[1];
+          last_target = target;
+          return target;
+        }
+
+        function getColor () {
+          return colors[0];
+        }
+
+        var timeline_2 = {
+          timeline: [
+            {
+              type: 'serial-reaction-time-mouse',
+              grid: grid,
+              target: getNextPredictor,
+              //target_color: getColor,
+              grid_square_size: square_size,
+              allow_nontarget_responses: false,
+
+
+
+            },
+            // {
+            //   type: 'serial-reaction-time-mouse',
+            //   grid: grid,
+            //   target: getNextTarget,
+            //   target_color: getColor,
+            //   grid_square_size: square_size,
+
+
+            // }
+          ],
+          repetitions: 30,
+        }
+
+        // jsPsych.init({
+        //   timeline: [timeline_2],
+        //   on_finish: function() {
+        //     jsPsych.data.displayData();
+        //   },
+        //   default_iti: 0
+        // });
+
+        timeline.push(instructions_tmt_1)
+        timeline.push(start_tmt);
+        timeline.push(instructions_tmt_2)
+        timeline.push(timeline_2)
+
+
+
+
+        //   var saveData = function (name, data){
+        //   var xhr = new XMLHttpRequest();
+        //   xhr.open('POST', '../../views/save_data.php'); // 'write_data.php' is the path to the php file described above.
+        //   xhr.setRequestHeader('Content-Type', 'application/json');
+        //   xhr.send(JSON.stringify({filename: name, filedata: data}));
+        // }
+
+
+
+
+
+
+
+
+
+        /////////////////////////////////////////////////////////////
+
+        var check_consent = function (elem) {
+          if (document.getElementById('consent_checkbox').checked) {
+            return true;
+          }
+          else {
+            alert("If you wish to participate, you must check the box next to the statement 'I agree to participate in this study.'");
+            return false;
+          }
+          return false;
+        };
+
+        var myfunc = function () {
+          jsPsych.data.get().localSave('csv', 'StroopColorWordMydata.csv');
+          jsPsych.extensions["webgazer"].pause();
+          jsPsych.extensions["webgazer"].hidePredictions();
+          jsPsych.data.displayData();
+          mediaRecorder.stop();
+          console.log(mediaRecorder.state);
+        }
+        var data_save = {
+          type: 'call-function',
+          func: myfunc
+        }
+        //timeline.push(data_save)  
+
+        var trial = {
+          type: 'external-html',
+          url: "../Feedback_form/feedback.html",
+          cont_btn: "Feedback",
+          //check_fn: check_consent
+
+        };
+
+        /*define save data function*/
+        function saveData (data) {
+          $.ajax({
+            type: "POST",
+            cache: false,
+            url: "/save_data",
+            data: JSON.stringify(data, function replacer (key, value) { return value }),
+            contentType: "application/json",
+            success: (response) => {
+              alert("Data saved successfully!")
+              window.location.href = "/report";
+            }
+          })
+
+            .fail(function () {
+              alert("A problem occurred while writing to the database. Please contact the researcher for more information.")
+              window.location.href = "/";
+            })
+        }
+
+
+        /* define thank you trial */
+        var thank_you = {
+          type: "html-keyboard-response",
+          stimulus: ColorWordThankYouText,
+          on_load: function (data) {
+            jsPsych.extensions["webgazer"].pause();
+            jsPsych.extensions["webgazer"].hidePredictions();
+            //mediaRecorder.stop();
+            //saveData(jsPsych.data.get().csv());
+            // $.ajax({
+            // type:"POST",
+            // cache: false,
+            // url: "/save_data", // this is the path to the above PHP script
+            // data: JSON.stringify(jsPsych.data.get().csv()),
+            // contentType: "application/json",
+            // })
+            // .done(function(){
+            // 	alert("Data saved!")
+            // })	
+          }
+        };
+
+
+
+        timeline.push(thank_you);
+        //timeline.push(trial)  
+
+
+
+
+        /* start the experiment */
+        //jatos.onLoad(function() { 
+        jsPsych.init({
+          //experiment_width: 600,  
+          timeline: timeline,
+          show_progress_bar: true,
+          extensions: [{ type: "webgazer", params: { round_predictions: false } }],
+          on_interaction_data_update: function (data) {
+            console.log(JSON.stringify(data))
+          },
+          on_finish: function () {
+            screenMediaRecorder.stop();
+            // jsPsych.data.get().localSave('csv','StroopColorWordMydata.csv');  
+            jsPsych.extensions["webgazer"].pause();
+            jsPsych.extensions["webgazer"].hidePredictions();
+            // jsPsych.data.displayData(); 
+            // mediaRecorder.stop(); 
+            // console.log(mediaRecorder.state);
+
+
+            //stroop data
+            console.log(jsPsych.data.get().select('subject').values[0]);
+            var DataFromThisPracticeRun = jsPsych.data.get().filter({ type: 'test trial' }).last(16 * ColorWordPracticeRepeats)
+            var total_trials = DataFromThisPracticeRun.count();
+            var total_C = DataFromThisPracticeRun.filter({ Congruency: 'Con' }).count();
+            var total_I = DataFromThisPracticeRun.filter({ Congruency: 'Incon' }).count();
+            var NumberCorrect = DataFromThisPracticeRun.filter({ correct: true }).count()
+            var NumberCorrect_C = DataFromThisPracticeRun.filter({ correct: true, Congruency: 'Con' }).count()
+            var NumberCorrect_I = DataFromThisPracticeRun.filter({ correct: true, Congruency: 'Incon' }).count()
+            var accuracy = Math.round(NumberCorrect / total_trials * 100);
+
+            var rt = Math.round(jsPsych.data.get().filter({ correct: true }).select('rt').median());
+            var congruent_rt = Math.round(jsPsych.data.get().filter({ correct: true, Congruency: 'Con' }).select('rt').median());
+            var incongruent_rt = Math.round(jsPsych.data.get().filter({ correct: true, Congruency: 'Incon' }).select('rt').median());
+            // Taking median RT referring from https://www.jneurosci.org/content/33/16/6776.long
+            var accuracy_C = Math.round(NumberCorrect_C / total_C * 100);
+            var accuracy_I = Math.round(NumberCorrect_I / total_I * 100);
+
+            var efficiency = (accuracy / rt * 100);
+
+            console.log("STROOP REPORT");
+            // console.log("total trials, correct responses, accuracy, congruent RT, Incongruent RT");
+            // console.log(total_trials, NumberCorrect, accuracy, congruent_rt, incongruent_rt);
+
+            console.log("Congruent Stimuli");
+            console.log("Total Stimuli, Correct,accuracy, Median RT, Inv_efficiency");
+            console.log(total_C, NumberCorrect_C, accuracy_C, congruent_rt, -1 * (congruent_rt / accuracy_C));
+            console.log("Incongruent Stimuli");
+            console.log("Total Stimuli, Correct,accuracy, Median RT, Inv_efficiency");
+            console.log(total_I, NumberCorrect_I, accuracy_I, incongruent_rt, -1 * (incongruent_rt / accuracy_I));
+
+            var eff_C = -1 * (congruent_rt / accuracy_C);
+            var eff_I = -1 * (incongruent_rt / accuracy_I);
+
+            var stroop_score = (eff_C - eff_I) / (eff_C + eff_I) * 100;
+
+            var eff2_C = accuracy_C / congruent_rt;
+            var eff2_I = accuracy_I / incongruent_rt;
+
+            var score2 = (eff2_C - eff2_I) / (eff2_C + eff2_I) * 100;
+
+            console.log("Stroop score", stroop_score);
+
+            console.log("efficiency_c", eff2_C, "efficiency_I", eff2_I);
+            console.log("Score 2", score2);
+
+            console.log("HEUEHUEHE", rt, accuracy, efficiency);
+
+            var Stroop_score;
+            if (accuracy > 30 && rt > 400) {
+              if (efficiency <= 4) {
+                Stroop_score = Math.ciel(20 - (20 * (4 - efficiency) / (4 - 0)));
+              } else if (efficiency > 4 && efficiency <= 8) {
+                Stroop_score = Math.ceil(50 - (50 - 20) * (8 - efficiency) / (8 - 4));
+              } else if (efficiency > 8 && efficiency <= 12) {
+                Stroop_score = Math.ceil(70 - (70 - 50) * (12 - efficiency) / (12 - 8));
+              }
+              else if (efficiency > 12 && efficiency <= 17) {
+                Stroop_score = Math.ceil(90 - (90 - 70) * (17 - efficiency) / (17 - 12));
+              } else if (efficiency > 17 && efficiency <= 20) {
+                Stroop_score = Math.ceil(98 - (98 - 90) * (20 - efficiency) / (20 - 17));
+              } else {
+                Stroop_score = 99;
+              }
+
+            } else {
+              Stroop_score = accuracy;
+            }
+            //cpt data
+            var test_trials = jsPsych.data.get().filter({ phase: 'test' }).last(sequence_length - 1);
+            var n_match = test_trials.filter({ match: true }).count();
+            var n_nonmatch = test_trials.filter({ match: false }).count();
+            var n_correct = test_trials.filter({ match: true, correct: true }).count();
+            var false_alarms = test_trials.filter({ match: false, correct: false }).count();
+            var av_rt = Math.round(jsPsych.data.get().filter({ match: true, correct: true }).select('rt').mean());
+
+            console.log("CPT Report");
+            console.log("Accuracy, Average response time in ms");
+            console.log(n_correct / n_match * 100, av_rt);
+            console.log(n_nonmatch, n_match, n_correct, false_alarms);
+            var eff_cpt = Math.min(99, (10 ** 4 * n_correct) / (n_match * av_rt) * 4);
+            var acc_nonmatch = 100 * (n_nonmatch - false_alarms) / n_nonmatch;
+
+
+            console.log("CPT EHHEHE", eff_cpt, acc_nonmatch);
+
+            var CPT_score = Math.ceil(eff_cpt * 0.6 + acc_nonmatch * 0.4);
+            console.log(CPT_score)
+
+            // tmt data
+            var TMT_rt = Math.round(jsPsych.data.get().filter({ trial_type: 'serial-reaction-time-mouse' }).select('rt').mean());
+            var total = TMT_rt * 30;
+
+            console.log("TMT Report")
+            console.log("Average response time, total time")
+            console.log(TMT_rt / 1000, total / 1000);
+
+            var TMT_score;
+            if (TMT_rt > 8000) {                                                         // Slab 1
+              TMT_score = 2;
+            } else if (TMT_rt > 5000 && TMT_rt <= 8000) {                                     // Slab 2
+              TMT_score = Math.ceil(15 - (15 - 2) * (TMT_rt - 5000) / (8000 - 5000));
+            } else if (TMT_rt > 3000 && TMT_rt <= 5000) {                                     // Slab 3
+              TMT_score = Math.ceil(30 - (30 - 15) * (TMT_rt - 3000) / (5000 - 3000));
+            } else if (TMT_rt > 2000 && TMT_rt <= 3000) {                                     // Slab 4
+              TMT_score = Math.ceil(60 - (60 - 30) * (TMT_rt - 2000) / (3000 - 2000));
+            } else if (TMT_rt > 1200 && TMT_rt <= 2000) {                                     // Slab 5
+              TMT_score = Math.ceil(98 - (98 - 60) * (TMT_rt - 1000) / (2000 - 1000))
+            } else {                                                                     // Slab 6
+              TMT_score = 99;
+            }
+            var data = {
+              columns: jsPsych.data.get().uniqueNames(),
+              subject_id: jsPsych.data.get().select('subject').values[0],
+              stroop_score: Stroop_score,
+              cpt_score: CPT_score,
+              tmt_score: TMT_score,
+              data: jsPsych.data.get().json()
+            };
+            saveData(data);
+            mediaRecorder.stop();
+
+            //emptySave();
+
+          }
+        });
+      }); 
+  </script>
+
+</html>
