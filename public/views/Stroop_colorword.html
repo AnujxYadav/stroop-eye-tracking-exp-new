@@ -661,8 +661,8 @@
         var sequence = [];
         var prac_sequence = [];
         var how_many_back = 1;
-        var prac_sequence_length = 10;
-        var sequence_length = 20;
+        var prac_sequence_length = 15;
+        var sequence_length = 40;
         /* Instructions */
 
         var start_cpt = {
@@ -1260,7 +1260,7 @@
             var Stroop_score;
             if (accuracy > 30 && rt > 400) {
               if (efficiency <= 4) {
-                Stroop_score = Math.ciel(20 - (20 * (4 - efficiency) / (4 - 0)));
+                Stroop_score = Math.ceil(20 - (20 * (4 - efficiency) / (4 - 0)));
               } else if (efficiency > 4 && efficiency <= 8) {
                 Stroop_score = Math.ceil(50 - (50 - 20) * (8 - efficiency) / (8 - 4));
               } else if (efficiency > 8 && efficiency <= 12) {

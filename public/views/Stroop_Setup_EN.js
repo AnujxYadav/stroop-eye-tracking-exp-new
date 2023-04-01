@@ -54,14 +54,14 @@ var FeedbackLength = 400; // This is in milliseconds
 
 var ColorPracticeRepeats = 4
 var WordPracticeRepeats = 4
-var ColorWordPracticeRepeats = 1 /////////////////////// 2
+var ColorWordPracticeRepeats = 2 /////////////////////// 2
 
 // Since there are 4 possible trials, the number of trials will be 4 times the number of repeats
 var ColorTestRepeats = 8
 // Since there are 4 possible trials, the number of trials will be 4 times the number of repeats
 var WordTestRepeats = 8
 // Since there are 16 possible trials, the number of trials will be 4 times the number of repeats
-var ColorWordTestRepeats = 1  /////////////////////////// 4
+var ColorWordTestRepeats = 4  /////////////////////////// 4
 
 
 
