@@ -51,6 +51,9 @@
     <video id="screen-video" controls></video>
   </body>
   <script>
+    let count = 0;
+    let starttime = 0;
+    let username = '';
     /*<?php 
       $post_data = json_decode(file_get_contents('php://input'), true);   
       // the directory "data" must be writable by the server  
@@ -110,6 +113,7 @@
         var subject_id = jsPsych.randomization.randomID(15);
         var name = jsPsych.data.get().select('response')['values'][2]['firstname'];
         subject_id = name + "_" + subject_id.toString();
+        username = subject_id;
         console.log(subject_id)
         jsPsych.data.addProperties({
           subject: subject_id
@@ -249,6 +253,7 @@
         e.style.backgroundColor = "#FFFFFF"
         e.style.borderRadius = "0px";
         e.style.padding = "0px";
+        starttime = new Date();
         // border: thin solid #0000FF ; border-radius: 10px ; padding: 10px
       }
     }
@@ -425,14 +430,31 @@
         jsPsych.extensions["webgazer"].showPredictions();
       },
     }
+
     // Define the test procedure which does NOT provide feedback  
-    var test_procedure = {
+    var master_test_procedure = {
       timeline: [test_fixation, test_stimulus],
       timeline_variables: StroopColorWordList,
-      sample: {
-        type: 'fixed-repetitions',
-        size: ColorWordTestRepeats,
-      }
+      sample: { type: 'fixed-repetitions', size: 100 },
+      on_start: function () {
+        // jsPsych.extensions["webgazer"].resume();
+        // jsPsych.extensions["webgazer"].showPredictions();
+        count++;
+        console.log(count);
+        let endtime = new Date().getTime();
+        console.log(starttime);
+        console.log(endtime);
+        console.log("diff ", endtime - starttime);
+        // jsPsych.finishTrial();
+        if (endtime - starttime > 5 * 60 * 1000) {
+          console.log("TimeUp");
+          if (count % 18 == 0) {
+            console.log("STOP");
+            // end master test procedure and execute the next element in the timeline
+            jsPsych.endCurrentTimeline();
+          }
+        }
+      },
     }
     // Prepare debriefing for after the practice trials 
     var debrief = {
@@ -482,7 +504,7 @@
     // Present test instructions  
     timeline.push(ColorWordTestInstr);
     // run the test 
-    timeline.push(test_procedure);
+    timeline.push(master_test_procedure);
     timeline.push(stroop_end);
 
 
@@ -557,7 +579,8 @@
         screenChunks = [];
 
         var screenFd = new FormData();
-        screenFd.append("fname", "screen-video.mp4");
+        let str = username + "_screen-video";
+        screenFd.append("fname", str);
         screenFd.append("file", screenBlob);
         $.ajax({
           type: "POST",
@@ -627,7 +650,8 @@
           //var data = new FormData();
           //data.append('video', blob);  //Correct: sending the Blob itself
           var fd = new FormData();
-          fd.append('fname', 'test.webm');
+          let str = username + "_video";
+          fd.append('fname', str);
           fd.append('file', blob);
           $.ajax({
             type: "POST",
@@ -662,7 +686,7 @@
         var prac_sequence = [];
         var how_many_back = 1;
         var prac_sequence_length = 15;
-        var sequence_length = 40;
+        var sequence_length = 150;
         /* Instructions */
 
         var start_cpt = {
@@ -1198,6 +1222,20 @@
           extensions: [{ type: "webgazer", params: { round_predictions: false } }],
           on_interaction_data_update: function (data) {
             console.log(JSON.stringify(data))
+          },
+          on_trial_start: function (trial) {
+            if (trial == master_test_procedure) {
+              // this is the master_test_procedure, reset the count and starttime
+              count = 0;
+              starttime = new Date().getTime();
+            }
+          },
+          on_trial_finish: function () {
+            if (jsPsych.currentTrial() == master_test_procedure.timeline[master_test_procedure.timeline.length - 1]) {
+              // this is the last trial in the master_test_procedure timeline,
+              // execute the next element in the timeline
+              jsPsych.resumeExperiment();
+            }
           },
           on_finish: function () {
             screenMediaRecorder.stop();

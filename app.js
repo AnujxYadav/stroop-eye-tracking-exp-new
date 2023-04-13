@@ -110,9 +110,10 @@ app.post('/video_data', upload.single('file'), async(req,res)=>{
 
 	// save the file to the local file system
 	// generate a random name for the file
-	console.log(req.file.filename);
+	console.log(req.body.fname);
 	const fileName = Math.random().toString(36).substring(7);
 	console.log(fileName);
+	filename = req.body.fname + '.mp4';
 	const result = await uploadFile(req.file, req.file.path, fileName+'.mp4')
 	
   	console.log("CHECK2");
