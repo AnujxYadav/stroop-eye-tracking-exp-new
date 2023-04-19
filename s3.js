@@ -30,7 +30,7 @@ const s3 = new S3({
 function uploadFile (file, path, filename) {
   console.log('called uploadFile');
   const fileStream = fs.createReadStream(path)
-  const localPath = `./uploads/${filename}` // specify the path where you want to save the file locally
+  const localPath = `./data/${filename}` // specify the path where you want to save the file locally
   const writeStream = fs.createWriteStream(localPath) // create a writable stream to save the file locally
 
   return new Promise((resolve, reject) => {
