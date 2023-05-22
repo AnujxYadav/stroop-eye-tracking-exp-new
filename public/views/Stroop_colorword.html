@@ -491,21 +491,21 @@
       }
     }
 
-    timeline.push(start_stroop);
-    timeline.push(ColorWordInstr);
-    // run the practice trials  
-    timeline.push(practice_procedure);
-    // provide feedback as to their performance 
-    timeline.push(debrief);
-    // decide if the person did well enough 
-    timeline.push(if_node);
-    // decide if the person did well enough 
-    //timeline.push(if_node); 
-    // Present test instructions  
-    timeline.push(ColorWordTestInstr);
-    // run the test 
-    timeline.push(master_test_procedure);
-    timeline.push(stroop_end);
+    // timeline.push(start_stroop);
+    // timeline.push(ColorWordInstr);
+    // // run the practice trials  
+    // timeline.push(practice_procedure);
+    // // provide feedback as to their performance 
+    // timeline.push(debrief);
+    // // decide if the person did well enough 
+    // timeline.push(if_node);
+    // // decide if the person did well enough 
+    // //timeline.push(if_node); 
+    // // Present test instructions  
+    // timeline.push(ColorWordTestInstr);
+    // // run the test 
+    // timeline.push(master_test_procedure);
+    // timeline.push(stroop_end);
 
 
 
@@ -523,6 +523,7 @@
     // facingMode: "environment"  
     //handle older browsers that might implement getUserMedia in some way 
     if (navigator.mediaDevices === undefined) {
+      console.log("HELLLO");
       navigator.mediaDevices = {};
       navigator.mediaDevices.getUserMedia = function (constraintObj) {
         let getUserMedia =
@@ -537,6 +538,7 @@
         });
       };
     } else {
+      console.log("Hello_from_else");
       navigator.mediaDevices
         .enumerateDevices()
         .then((devices) => {
@@ -551,6 +553,7 @@
     }
     let screenMediaRecorder;
     navigator.mediaDevices.getDisplayMedia({ video: true }).then(function (screenStream) {
+      console.log("Screen Waiting");
       // Connect the screen stream to the video element
       let screenVideo = document.getElementById("screen-video");
       if ("srcObject" in screenVideo) {
@@ -560,7 +563,7 @@
       }
       screenVideo.onloadedmetadata = function (ev) {
         console.log("Screen stream is playing");
-        screenVideo.play();
+        // screenVideo.play();
       };
 
       // Start recording the screen stream
@@ -599,361 +602,361 @@
           },
         });
       };
-    }).catch(function (err) {
-      console.log("Error: " + err);
-    });
+    }).then(function () {
+      // Start recording the camera stream
 
-    navigator.mediaDevices
-      .getUserMedia(constraintObj)
-      .then(function (mediaStreamObj) {
-        //connect the media stream to the first video element 
-        let video = document.getElementById("default");
-        if ("srcObject" in video) {
-          video.srcObject = mediaStreamObj;
-        } else {
-          //old version 
-          video.src = window.URL.createObjectURL(mediaStreamObj);
-        }
-        video.onloadedmetadata = function (ev) {
-          //show in the video element what is being captured by the webcam  
-          //video.play();
-          console.log("Video Recording!");
-        };
-        //add listeners for saving video/audio  
-        //let start = document.getElementById("btnStart");  
-        //let stop = document.getElementById("btnStop");  
-        //let vidSave = document.getElementById("vid2");  
-        let mediaRecorder = new MediaRecorder(mediaStreamObj);
-        let chunks = [];
-        mediaRecorder.start();
-        console.log(mediaRecorder.state);
-        // stop.addEventListener("click", (ev) => { 
-        //   mediaRecorder.stop();  
-        // });  
-        mediaRecorder.ondataavailable = function (ev) {
-          chunks.push(ev.data);
-          console.log(chunks);
-        };
-        mediaRecorder.onstop = (ev) => {
-          let blob = new Blob(chunks, { type: "video/mp4;" });
-          chunks = [];
-          // let videoURL = window.URL.createObjectURL(blob); 
-          // vidSave.src = videoURL;  
+      navigator.mediaDevices
+        .getUserMedia(constraintObj)
+        .then(function (mediaStreamObj) {
+          console.log("Camera Waiting");
+          //connect the media stream to the first video element 
+          let video = document.getElementById("default");
+          if ("srcObject" in video) {
+            video.srcObject = mediaStreamObj;
+          } else {
+            //old version 
+            video.src = window.URL.createObjectURL(mediaStreamObj);
+          }
+          video.onloadedmetadata = function (ev) {
+            //show in the video element what is being captured by the webcam  
+            //video.play();
+            console.log("Video Recording!");
+          };
+          //add listeners for saving video/audio  
+          //let start = document.getElementById("btnStart");  
+          //let stop = document.getElementById("btnStop");  
+          //let vidSave = document.getElementById("vid2");  
+          let mediaRecorder = new MediaRecorder(mediaStreamObj);
+          let chunks = [];
+          mediaRecorder.start();
+          console.log(mediaRecorder.state);
+          // stop.addEventListener("click", (ev) => { 
+          //   mediaRecorder.stop();  
+          // });  
+          mediaRecorder.ondataavailable = function (ev) {
+            chunks.push(ev.data);
+            console.log(chunks);
+          };
+          mediaRecorder.onstop = (ev) => {
+            let blob = new Blob(chunks, { type: "video/mp4;" });
+            chunks = [];
+            // let videoURL = window.URL.createObjectURL(blob); 
+            // vidSave.src = videoURL;  
 
-          //local save
-          // var filename = "data_video.mp4";  
-          // console.log(blob);  
-          // saveAs(blob, filename); 
-          // // Need to save this on Server. 
-          // console.log("File saved Locally"); 
+            //local save
+            // var filename = "data_video.mp4";  
+            // console.log(blob);  
+            // saveAs(blob, filename); 
+            // // Need to save this on Server. 
+            // console.log("File saved Locally"); 
 
-          //var data = new FormData();
-          //data.append('video', blob);  //Correct: sending the Blob itself
-          var fd = new FormData();
-          let str = username + "_video";
-          fd.append('fname', str);
-          fd.append('file', blob);
-          $.ajax({
-            type: "POST",
-            enctype: 'multipart/form-data',
-            url: "/video_data",
-            data: fd,
-            processData: false,
-            contentType: false,
-            cache: false,
-            timeout: 600000,
-            success: function (response) {
-              alert("Video saved at server successfully!")
-              window.location.href = "/report";
-
-
-            },
-            error: function (e) {
-              console.log("ERROR : ", e);
-            }
-          });
-        };
+            //var data = new FormData();
+            //data.append('video', blob);  //Correct: sending the Blob itself
+            var fd = new FormData();
+            let str = username + "_video";
+            fd.append('fname', str);
+            fd.append('file', blob);
+            $.ajax({
+              type: "POST",
+              enctype: 'multipart/form-data',
+              url: "/video_data",
+              data: fd,
+              processData: false,
+              contentType: false,
+              cache: false,
+              timeout: 600000,
+              success: function (response) {
+                alert("Video saved at server successfully!")
+                window.location.href = "/report";
 
 
-
-        ////////////////////////////////////////////////////////////////////////////  
-        ////////////////////////////////////////////////////////////////////////////  
-
-        //timeline.push(trial)  
-
-        var n_back_set = ['Z', 'X', 'C', 'V', 'B', 'N'];
-        var sequence = [];
-        var prac_sequence = [];
-        var how_many_back = 1;
-        var prac_sequence_length = 15;
-        var sequence_length = 150;
-        /* Instructions */
-
-        var start_cpt = {
-          type: 'html-button-response',
-          stimulus: '<div style="width: 800px; padding: 50px; border-radius: 10px ;background-color: #fff1f1">' + '<p style="font-size:20px">Welcome to the Task 2:</p>' + '<h1>Continuous Performance Task</h1>',
-          choices: ["Continue"],
-        }
-
-        timeline.push(start_cpt);
-
-        var instructions_1 = {
-          type: 'html-button-response',
-          stimulus: '<div style="width: 800px;border: thin solid #ec7b7b ; border-radius: 10px ; padding: 10px">' +
-            '<p>This task will test your ability to hold information in short-term, temporary memory.</p>' + '<p>This is called working memory.</p>' +
-            '</div>',
-          choices: ["Continue"]
-        }
-        timeline.push(instructions_1);
+              },
+              error: function (e) {
+                console.log("ERROR : ", e);
+              }
+            });
+          };
 
 
-        var instructions_2 = {
-          type: 'html-button-response',
-          stimulus: '<div style="width: 800px;border: thin solid #ec7b7b ; border-radius: 10px ; padding: 10px">' +
-            `
+
+          ////////////////////////////////////////////////////////////////////////////  
+          ////////////////////////////////////////////////////////////////////////////  
+
+          //timeline.push(trial)  
+
+          var n_back_set = ['Z', 'X', 'C', 'V', 'B', 'N'];
+          var sequence = [];
+          var prac_sequence = [];
+          var how_many_back = 1;
+          var prac_sequence_length = 15;
+          var sequence_length = 150;
+          /* Instructions */
+
+          var start_cpt = {
+            type: 'html-button-response',
+            stimulus: '<div style="width: 800px; padding: 50px; border-radius: 10px ;background-color: #fff1f1">' + '<p style="font-size:20px">Welcome to the Task 2:</p>' + '<h1>Continuous Performance Task</h1>',
+            choices: ["Continue"],
+          }
+
+          // timeline.push(start_cpt);
+
+          var instructions_1 = {
+            type: 'html-button-response',
+            stimulus: '<div style="width: 800px;border: thin solid #ec7b7b ; border-radius: 10px ; padding: 10px">' +
+              '<p>This task will test your ability to hold information in short-term, temporary memory.</p>' + '<p>This is called working memory.</p>' +
+              '</div>',
+            choices: ["Continue"]
+          }
+          // timeline.push(instructions_1);
+
+
+          var instructions_2 = {
+            type: 'html-button-response',
+            stimulus: '<div style="width: 800px;border: thin solid #ec7b7b ; border-radius: 10px ; padding: 10px">' +
+              `
         	<ol>
         	<li style="text-align:left; padding:8px; font-size: 18px">You will see a sequence of letters presented one at a time. Your task is to determine if the letter on the screen is the same that appeared on the last screen.</li>
         	<li style="text-align:left; padding:8px; font-size: 18px">If the letter is a match <span style="font-weight: bold;">press the M key.</li>
         	<li style="text-align:left; padding:8px; font-size: 18px">For example, if you saw the sequence X, C, C, B, B, X you would press the M key when the second C appeared and similarly when the second B appeared on the screen.</li>
         	<li style="text-align:left; padding:8px; font-size: 18px">You do not need to press any key when there is not a match.</li>
         	</ol>`
-            +
-            '</div>',
-          choices: ["Continue"]
-        }
-        timeline.push(instructions_2);
-        var instructions_3 = {
-          type: 'html-button-response',
-          stimulus: '<div style="width: 800px;border: thin solid #ec7b7b ; border-radius: 10px ;padding: 10px">' +
-            '<p>The sequence will begin on the next screen.</p>' +
-            '<p>This is a practice trial. Lets see how focused you are.</p>' +
-            '<p>Remember: press the M key if a letter appears on simultaneous screens.</p>' +
-            '</div>',
-          choices: ["I'm ready to start!"],
-          post_trial_gap: 1000
-        }
-        timeline.push(instructions_3);
+              +
+              '</div>',
+            choices: ["Continue"]
+          }
+          timeline.push(instructions_2);
+          var instructions_3 = {
+            type: 'html-button-response',
+            stimulus: '<div style="width: 800px;border: thin solid #ec7b7b ; border-radius: 10px ;padding: 10px">' +
+              '<p>The sequence will begin on the next screen.</p>' +
+              '<p>This is a practice trial. Lets see how focused you are.</p>' +
+              '<p>Remember: press the M key if a letter appears on simultaneous screens.</p>' +
+              '</div>',
+            choices: ["I'm ready to start!"],
+            post_trial_gap: 1000
+          }
+          timeline.push(instructions_3);
 
 
 
 
 
 
-        // Setting up the practice sequence
+          // Setting up the practice sequence
 
-        var prac_n_back_trial = {
-          type: 'html-keyboard-response',
-          stimulus: function () {
-            if (prac_sequence.length < how_many_back) {
-              var letter = jsPsych.randomization.sampleWithoutReplacement(n_back_set, 1)[0]
-            } else {
-              if (jsPsych.timelineVariable('match', true) == true) {
-                var letter = prac_sequence[prac_sequence.length - how_many_back];
+          var prac_n_back_trial = {
+            type: 'html-keyboard-response',
+            stimulus: function () {
+              if (prac_sequence.length < how_many_back) {
+                var letter = jsPsych.randomization.sampleWithoutReplacement(n_back_set, 1)[0]
               } else {
-                var possible_letters = jsPsych.randomization.sampleWithoutReplacement(n_back_set, 2);
-                if (possible_letters[0] != prac_sequence[prac_sequence.length - how_many_back]) {
-                  var letter = possible_letters[0];
+                if (jsPsych.timelineVariable('match', true) == true) {
+                  var letter = prac_sequence[prac_sequence.length - how_many_back];
                 } else {
-                  var letter = possible_letters[1];
+                  var possible_letters = jsPsych.randomization.sampleWithoutReplacement(n_back_set, 2);
+                  if (possible_letters[0] != prac_sequence[prac_sequence.length - how_many_back]) {
+                    var letter = possible_letters[0];
+                  } else {
+                    var letter = possible_letters[1];
+                  }
                 }
               }
-            }
-            prac_sequence.push(letter);
+              prac_sequence.push(letter);
 
-            return '<div style = "centre" ><span style="font-size: 96px;">' + letter + '</span></div>'
-            //'<div style = "margin-top:100px ; margin-left:200px" ><span style="font-size: 96px;">'+letter+'</span></div>'
-          },
-          choices: ['M'],
-          trial_duration: 1500,
-          response_ends_trial: false,
-          post_trial_gap: 500,
-          extensions: [
-            {
-              type: "webgazer",
-              params: {
-                targets: ["#jspsych-html-keyboard-response-stimulus"],
-              },
+              return '<div style = "centre" ><span style="font-size: 96px;">' + letter + '</span></div>'
+              //'<div style = "margin-top:100px ; margin-left:200px" ><span style="font-size: 96px;">'+letter+'</span></div>'
             },
-          ],
-          data: {
-            phase: 'Practice',
-            match: jsPsych.timelineVariable('match')
-          },
-          on_finish: function (data) {
-            if (data.match == true) {
-              data.correct = (data.response != null)
-            }
-            if (data.match == false) {
-              data.correct = (data.response === null)
-            }
-          }
-        }
-
-        var prac_n_back_trials = [
-          { match: true },
-          { match: false }
-        ]
-
-
-        var prac_n_back_sequence = {
-          timeline: [prac_n_back_trial],
-          timeline_variables: prac_n_back_trials,
-          sample: {
-            type: 'with-replacement',
-            size: prac_sequence_length,
-            weights: [1, 2]
-          }
-        }
-
-
-        var prac_feedback = {
-          type: 'html-button-response',
-          stimulus: function () {
-            var test_trials = jsPsych.data.get().filter({ phase: 'Practice' }).last(prac_sequence_length - 1);
-            var n_match = test_trials.filter({ match: true }).count();
-            var n_nonmatch = test_trials.filter({ match: false }).count();
-            var n_correct = test_trials.filter({ match: true, correct: true }).count();
-            var false_alarms = test_trials.filter({ match: false, correct: false }).count();
-            var html = "<div style='width:800px;'>" +
-              "<p>All done!</p>" +
-              "<p>You correctly identified " + n_correct + " of the " + n_match + " matching items.</p>" +
-              "<p>You incorrectly identified " + false_alarms + " of the " + n_nonmatch + " non-matching items as matches.</p>" +
-              "<strong>Let's move to the actual test.</strong>" +
-              "<p style = 'color:rgb(255,150,100)'>Words might appear anywhere on the screen</p>"
-
-
-            return html;
-          },
-          choices: ["I'm ready to start!"]
-        }
-
-
-
-        timeline.push(prac_n_back_sequence);
-        timeline.push(prac_feedback);
-
-
-
-        /* N Back sequence trials */
-
-        var min_divWidth = -1000
-        var max_divWidth = 1000
-        var min_divHeight = -380
-        var max_divHeight = 380
-        var n_back_trial = {
-          type: 'html-keyboard-response',
-          stimulus: function () {
-            if (sequence.length < how_many_back) {
-              var letter = jsPsych.randomization.sampleWithoutReplacement(n_back_set, 1)[0]
-            } else {
-              if (jsPsych.timelineVariable('match', true) == true) {
-                var letter = sequence[sequence.length - how_many_back];
-              } else {
-                var possible_letters = jsPsych.randomization.sampleWithoutReplacement(n_back_set, 2);
-                if (possible_letters[0] != sequence[sequence.length - how_many_back]) {
-                  var letter = possible_letters[0];
-                } else {
-                  var letter = possible_letters[1];
-                }
+            choices: ['M'],
+            trial_duration: 1500,
+            response_ends_trial: false,
+            post_trial_gap: 500,
+            extensions: [
+              {
+                type: "webgazer",
+                params: {
+                  targets: ["#jspsych-html-keyboard-response-stimulus"],
+                },
+              },
+            ],
+            data: {
+              phase: 'Practice',
+              match: jsPsych.timelineVariable('match')
+            },
+            on_finish: function (data) {
+              if (data.match == true) {
+                data.correct = (data.response != null)
+              }
+              if (data.match == false) {
+                data.correct = (data.response === null)
               }
             }
-            sequence.push(letter);
-            n1 = Math.floor(Math.random() * (max_divHeight - min_divHeight) + min_divHeight)
-            n2 = Math.floor(Math.random() * (max_divWidth - min_divWidth) + min_divWidth)
-            s1 = n1.toString()
-            s2 = n2.toString()
-            //console.log(n1,n2)
-            t1 = "margin-top:" + s1 + "px ; margin-left:" + s2 + "px"
-            t1 = t1.toString()
-            return '<div style = "' + t1 + '" ><span style="font-size: 96px;">' + letter + '</span></div>'
-            //'<div style = "margin-top:100px ; margin-left:200px" ><span style="font-size: 96px;">'+letter+'</span></div>'
-          },
-          choices: ['M'],
-          trial_duration: 1500,
-          response_ends_trial: false,
-          post_trial_gap: 500,
-          extensions: [
-            {
-              type: "webgazer",
-              params: {
-                targets: ["#jspsych-html-keyboard-response-stimulus"],
-              },
+          }
+
+          var prac_n_back_trials = [
+            { match: true },
+            { match: false }
+          ]
+
+
+          var prac_n_back_sequence = {
+            timeline: [prac_n_back_trial],
+            timeline_variables: prac_n_back_trials,
+            sample: {
+              type: 'with-replacement',
+              size: prac_sequence_length,
+              weights: [1, 2]
+            }
+          }
+
+
+          var prac_feedback = {
+            type: 'html-button-response',
+            stimulus: function () {
+              var test_trials = jsPsych.data.get().filter({ phase: 'Practice' }).last(prac_sequence_length - 1);
+              var n_match = test_trials.filter({ match: true }).count();
+              var n_nonmatch = test_trials.filter({ match: false }).count();
+              var n_correct = test_trials.filter({ match: true, correct: true }).count();
+              var false_alarms = test_trials.filter({ match: false, correct: false }).count();
+              var html = "<div style='width:800px;'>" +
+                "<p>All done!</p>" +
+                "<p>You correctly identified " + n_correct + " of the " + n_match + " matching items.</p>" +
+                "<p>You incorrectly identified " + false_alarms + " of the " + n_nonmatch + " non-matching items as matches.</p>" +
+                "<strong>Let's move to the actual test.</strong>" +
+                "<p style = 'color:rgb(255,150,100)'>Words might appear anywhere on the screen</p>"
+
+
+              return html;
             },
-          ],
+            choices: ["I'm ready to start!"]
+          }
 
-          data: {
-            phase: 'test',
-            match: jsPsych.timelineVariable('match')
-          },
-          on_finish: function (data) {
-            if (data.match == true) {
-              data.correct = (data.response != null)
-            }
-            if (data.match == false) {
-              data.correct = (data.response === null)
+
+
+          // timeline.push(prac_n_back_sequence);
+          // timeline.push(prac_feedback);
+
+
+
+          /* N Back sequence trials */
+
+          var min_divWidth = -1000
+          var max_divWidth = 1000
+          var min_divHeight = -380
+          var max_divHeight = 380
+          var n_back_trial = {
+            type: 'html-keyboard-response',
+            stimulus: function () {
+              if (sequence.length < how_many_back) {
+                var letter = jsPsych.randomization.sampleWithoutReplacement(n_back_set, 1)[0]
+              } else {
+                if (jsPsych.timelineVariable('match', true) == true) {
+                  var letter = sequence[sequence.length - how_many_back];
+                } else {
+                  var possible_letters = jsPsych.randomization.sampleWithoutReplacement(n_back_set, 2);
+                  if (possible_letters[0] != sequence[sequence.length - how_many_back]) {
+                    var letter = possible_letters[0];
+                  } else {
+                    var letter = possible_letters[1];
+                  }
+                }
+              }
+              sequence.push(letter);
+              n1 = Math.floor(Math.random() * (max_divHeight - min_divHeight) + min_divHeight)
+              n2 = Math.floor(Math.random() * (max_divWidth - min_divWidth) + min_divWidth)
+              s1 = n1.toString()
+              s2 = n2.toString()
+              //console.log(n1,n2)
+              t1 = "margin-top:" + s1 + "px ; margin-left:" + s2 + "px"
+              t1 = t1.toString()
+              return '<div style = "' + t1 + '" ><span style="font-size: 96px;">' + letter + '</span></div>'
+              //'<div style = "margin-top:100px ; margin-left:200px" ><span style="font-size: 96px;">'+letter+'</span></div>'
+            },
+            choices: ['M'],
+            trial_duration: 1500,
+            response_ends_trial: false,
+            post_trial_gap: 500,
+            extensions: [
+              {
+                type: "webgazer",
+                params: {
+                  targets: ["#jspsych-html-keyboard-response-stimulus"],
+                },
+              },
+            ],
+
+            data: {
+              phase: 'test',
+              match: jsPsych.timelineVariable('match')
+            },
+            on_finish: function (data) {
+              if (data.match == true) {
+                data.correct = (data.response != null)
+              }
+              if (data.match == false) {
+                data.correct = (data.response === null)
+              }
             }
           }
-        }
-        var n_back_trials = [
-          { match: true },
-          { match: false }
-        ]
-        var n_back_sequence = {
-          timeline: [n_back_trial],
-          timeline_variables: n_back_trials,
-          sample: {
-            type: 'with-replacement',
-            size: sequence_length,
-            weights: [1, 2]
+          var n_back_trials = [
+            { match: true },
+            { match: false }
+          ]
+          var n_back_sequence = {
+            timeline: [n_back_trial],
+            timeline_variables: n_back_trials,
+            sample: {
+              type: 'with-replacement',
+              size: sequence_length,
+              weights: [1, 2]
+            }
           }
-        }
-        timeline.push(n_back_sequence);
-        /* feedback */
-        var feedback = {
-          type: 'html-keyboard-response',
-          stimulus: function () {
-            var test_trials = jsPsych.data.get().filter({ phase: 'test' }).last(sequence_length - 1);
-            var n_match = test_trials.filter({ match: true }).count();
-            var n_nonmatch = test_trials.filter({ match: false }).count();
-            var n_correct = test_trials.filter({ match: true, correct: true }).count();
-            var false_alarms = test_trials.filter({ match: false, correct: false }).count();
-            var html = "<div style='width:800px;'>" +
-              "<p>All done!</p>" +
-              "<p>You correctly identified " + n_correct + " of the " + n_match + " matching items.</p>" +
-              "<p>You incorrectly identified " + false_alarms + " of the " + n_nonmatch + " non-matching items as matches.</p>" +
-              "<p>Please press any key to proceed"
+          // timeline.push(n_back_sequence);
+          /* feedback */
+          var feedback = {
+            type: 'html-keyboard-response',
+            stimulus: function () {
+              var test_trials = jsPsych.data.get().filter({ phase: 'test' }).last(sequence_length - 1);
+              var n_match = test_trials.filter({ match: true }).count();
+              var n_nonmatch = test_trials.filter({ match: false }).count();
+              var n_correct = test_trials.filter({ match: true, correct: true }).count();
+              var false_alarms = test_trials.filter({ match: false, correct: false }).count();
+              var html = "<div style='width:800px;'>" +
+                "<p>All done!</p>" +
+                "<p>You correctly identified " + n_correct + " of the " + n_match + " matching items.</p>" +
+                "<p>You incorrectly identified " + false_alarms + " of the " + n_nonmatch + " non-matching items as matches.</p>" +
+                "<p>Please press any key to proceed"
 
-            return html;
-          },
-          choices: jsPsych.ALL_KEYS
-        }
-        timeline.push(feedback);
-
+              return html;
+            },
+            choices: jsPsych.ALL_KEYS
+          }
+          // timeline.push(feedback);
 
 
-        //////////////////////////////////////////////////////////
 
-        var start_tmt = {
-          type: 'html-button-response',
-          stimulus: '<div style="width: 800px; padding: 50px; border-radius: 10px ;background-color: #cfffc1">' + '<p style="font-size:20px">Welcome to the Task 3:</p>' + '<h1>Trail-Making Task</h1>',
-          choices: ["Continue"],
-        }
+          //////////////////////////////////////////////////////////
 
-        //    timeline.push(start_cpt);
+          var start_tmt = {
+            type: 'html-button-response',
+            stimulus: '<div style="width: 800px; padding: 50px; border-radius: 10px ;background-color: #cfffc1">' + '<p style="font-size:20px">Welcome to the Task 3:</p>' + '<h1>Trail-Making Task</h1>',
+            choices: ["Continue"],
+          }
 
-        var instructions_tmt_1 = {
-          type: 'html-button-response',
-          stimulus: '<div style="width: 800px;">' +
-            '<p>Please continue to head towards the last task of the study </p>' +
-            '</div>',
-          choices: ["Continue"]
-        }
+          //    timeline.push(start_cpt);
 
-        var instructions_tmt_2 = {
-          type: 'html-button-response',
-          stimulus: '<div style="width: 800px;border: thin solid #65dc7f ; border-radius: 10px ;">' +
+          var instructions_tmt_1 = {
+            type: 'html-button-response',
+            stimulus: '<div style="width: 800px;">' +
+              '<p>Please continue to head towards the last task of the study </p>' +
+              '</div>',
+            choices: ["Continue"]
+          }
 
-            `
+          var instructions_tmt_2 = {
+            type: 'html-button-response',
+            stimulus: '<div style="width: 800px;border: thin solid #65dc7f ; border-radius: 10px ;">' +
+
+              `
     	<ul>
     	<li style="text-align:left; padding:8px; font-size: 18px">    On the next screen you will see bubbles with a character written in them.</li>
     	<li style="text-align:left; padding:8px; font-size: 18px">Click on the bubbles starting from 1.</li>
@@ -961,419 +964,423 @@
 
     	</ul>`
 
-            +
-            '</div>',
-          choices: ["Continue"]
-        }
-
-
-
-        var grid_rows = 10;
-        var grid_cols = 21;
-        var square_size = 50;
-
-        var grid = [];
-        var locations = [];
-        var arr = [];
-        for (var i = 0; i < grid_cols; i++) {
-          arr.push(i);
-        }
-        for (var i = 0; i < grid_rows; i++) {
-          grid.push([]);
-
-          for (var j = 0; j < grid_cols; j++) {
-
-            grid[i].push(0);
-            // if(i>0 && i < grid_rows-1 && j > 0 && j < grid_cols - 1){
-            //   locations.push([i,j]);
-            // }
+              +
+              '</div>',
+            choices: ["Continue"]
           }
-        }
 
-        char_per_row = 3
-        let element_locs = new Map()
-        var elements = [1, "A", 2, "B", 3, "C", 4, "D", 5, "E", 6, "F", 7, "G", 8, "H", 9, "I", 10, "J", 11, "K", 12, "L", 13, "M", 14, "N", 15, "O"]
-        var shuffledArray = jsPsych.randomization.repeat(elements, 1);
-        for (var i = 0; i < grid_rows; i++) {
-          var sample = jsPsych.randomization.sampleWithoutReplacement(arr, char_per_row);
-          var heh = jsPsych.randomization.sampleWithoutReplacement(elements, char_per_row);
-          heh = shuffledArray.slice(i * char_per_row, char_per_row * i + char_per_row);
-          console.log(heh);
-          for (var j = 0; j < 4; j++) {
-            grid[i][sample[j]] = heh[j];
-            element_locs.set(heh[j], [i, sample[j]]);
 
-            if (i > 0 && i < grid_rows - 1 && sample[j] > 0 && sample[j] < grid_cols - 1) {
-              locations.push([i, sample[j]])
+
+          var grid_rows = 10;
+          var grid_cols = 21;
+          var square_size = 50;
+
+          var grid = [];
+          var locations = [];
+          var arr = [];
+          for (var i = 0; i < grid_cols; i++) {
+            arr.push(i);
+          }
+          for (var i = 0; i < grid_rows; i++) {
+            grid.push([]);
+
+            for (var j = 0; j < grid_cols; j++) {
+
+              grid[i].push(0);
+              // if(i>0 && i < grid_rows-1 && j > 0 && j < grid_cols - 1){
+              //   locations.push([i,j]);
+              // }
             }
           }
-        }
-        console.log(grid)
-        console.log(locations)
-        console.log(element_locs)
 
+          char_per_row = 3
+          let element_locs = new Map()
+          var elements = [1, "A", 2, "B", 3, "C", 4, "D", 5, "E", 6, "F", 7, "G", 8, "H", 9, "I", 10, "J", 11, "K", 12, "L", 13, "M", 14, "N", 15, "O"]
+          var shuffledArray = jsPsych.randomization.repeat(elements, 1);
+          for (var i = 0; i < grid_rows; i++) {
+            var sample = jsPsych.randomization.sampleWithoutReplacement(arr, char_per_row);
+            var heh = jsPsych.randomization.sampleWithoutReplacement(elements, char_per_row);
+            heh = shuffledArray.slice(i * char_per_row, char_per_row * i + char_per_row);
+            console.log(heh);
+            for (var j = 0; j < 4; j++) {
+              grid[i][sample[j]] = heh[j];
+              element_locs.set(heh[j], [i, sample[j]]);
 
-        var last_predictor = null;
-        var last_target = null;
-        var colors = ["#aaf300"];
-        var deltas = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
-        var order = [0, 1, 2, 3, 4, 5, 6, 7];
-        order = jsPsych.randomization.shuffle(order);
-        var current_idx = -1;
-
-
-
-        function getNextPredictor () {
-
-          current_idx++;
-          //console.log(current_idx)
-          if (current_idx >= elements.length) {
-            order = jsPsych.randomization.shuffle(order);
-            current_idx = 0;
-          }
-          var predictor = jsPsych.randomization.sampleWithoutReplacement(locations, 1)[0];
-          if (last_target !== null) {
-            while (predictor[0] == last_target[0] && predictor[1] == last_target[1]) {
-              predictor = jsPsych.randomization.sampleWithoutReplacement(locations, 1)[0];
+              if (i > 0 && i < grid_rows - 1 && sample[j] > 0 && sample[j] < grid_cols - 1) {
+                locations.push([i, sample[j]])
+              }
             }
           }
-          last_predictor = predictor;
-          //console.log(predictor)
-          //console.log(elements[current_idx])
-          //console.log(element_locs.has(1))
-          //console.log(predictor)
+          console.log(grid)
+          console.log(locations)
+          console.log(element_locs)
 
-          predictor = element_locs.get(elements[current_idx])
-          var s = grid[predictor[0]][predictor[1]]
-          if (typeof s === 'string') {
-            grid[predictor[0]][predictor[1]] = s.toLowerCase();
+
+          var last_predictor = null;
+          var last_target = null;
+          var colors = ["#aaf300"];
+          var deltas = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+          var order = [0, 1, 2, 3, 4, 5, 6, 7];
+          order = jsPsych.randomization.shuffle(order);
+          var current_idx = -1;
+
+
+
+          function getNextPredictor () {
+
+            current_idx++;
+            //console.log(current_idx)
+            if (current_idx >= elements.length) {
+              order = jsPsych.randomization.shuffle(order);
+              current_idx = 0;
+            }
+            var predictor = jsPsych.randomization.sampleWithoutReplacement(locations, 1)[0];
+            if (last_target !== null) {
+              while (predictor[0] == last_target[0] && predictor[1] == last_target[1]) {
+                predictor = jsPsych.randomization.sampleWithoutReplacement(locations, 1)[0];
+              }
+            }
+            last_predictor = predictor;
+            //console.log(predictor)
+            //console.log(elements[current_idx])
+            //console.log(element_locs.has(1))
+            //console.log(predictor)
+
+            predictor = element_locs.get(elements[current_idx])
+            var s = grid[predictor[0]][predictor[1]]
+            if (typeof s === 'string') {
+              grid[predictor[0]][predictor[1]] = s.toLowerCase();
+            }
+            else {
+              grid[predictor[0]][predictor[1]] = -1 * grid[predictor[0]][predictor[1]]
+            }
+            console.log(s)
+            //grid[predictor[0]][predictor[1]] = s.toLowerCase()
+            return predictor;
           }
-          else {
-            grid[predictor[0]][predictor[1]] = -1 * grid[predictor[0]][predictor[1]]
+
+
+          function getNextTarget () {
+            var target = last_predictor.slice();
+            var d = deltas[order[current_idx]];
+            target[0] = target[0] + d[0];
+            target[1] = target[1] + d[1];
+            last_target = target;
+            return target;
           }
-          console.log(s)
-          //grid[predictor[0]][predictor[1]] = s.toLowerCase()
-          return predictor;
-        }
 
-
-        function getNextTarget () {
-          var target = last_predictor.slice();
-          var d = deltas[order[current_idx]];
-          target[0] = target[0] + d[0];
-          target[1] = target[1] + d[1];
-          last_target = target;
-          return target;
-        }
-
-        function getColor () {
-          return colors[0];
-        }
-
-        var timeline_2 = {
-          timeline: [
-            {
-              type: 'serial-reaction-time-mouse',
-              grid: grid,
-              target: getNextPredictor,
-              //target_color: getColor,
-              grid_square_size: square_size,
-              allow_nontarget_responses: false,
-
-
-
-            },
-            // {
-            //   type: 'serial-reaction-time-mouse',
-            //   grid: grid,
-            //   target: getNextTarget,
-            //   target_color: getColor,
-            //   grid_square_size: square_size,
-
-
-            // }
-          ],
-          repetitions: 30,
-        }
-
-        // jsPsych.init({
-        //   timeline: [timeline_2],
-        //   on_finish: function() {
-        //     jsPsych.data.displayData();
-        //   },
-        //   default_iti: 0
-        // });
-
-        timeline.push(instructions_tmt_1)
-        timeline.push(start_tmt);
-        timeline.push(instructions_tmt_2)
-        timeline.push(timeline_2)
-
-
-
-
-        //   var saveData = function (name, data){
-        //   var xhr = new XMLHttpRequest();
-        //   xhr.open('POST', '../../views/save_data.php'); // 'write_data.php' is the path to the php file described above.
-        //   xhr.setRequestHeader('Content-Type', 'application/json');
-        //   xhr.send(JSON.stringify({filename: name, filedata: data}));
-        // }
-
-
-
-
-
-
-
-
-
-        /////////////////////////////////////////////////////////////
-
-        var check_consent = function (elem) {
-          if (document.getElementById('consent_checkbox').checked) {
-            return true;
+          function getColor () {
+            return colors[0];
           }
-          else {
-            alert("If you wish to participate, you must check the box next to the statement 'I agree to participate in this study.'");
+
+          var timeline_2 = {
+            timeline: [
+              {
+                type: 'serial-reaction-time-mouse',
+                grid: grid,
+                target: getNextPredictor,
+                //target_color: getColor,
+                grid_square_size: square_size,
+                allow_nontarget_responses: false,
+
+
+
+              },
+              // {
+              //   type: 'serial-reaction-time-mouse',
+              //   grid: grid,
+              //   target: getNextTarget,
+              //   target_color: getColor,
+              //   grid_square_size: square_size,
+
+
+              // }
+            ],
+            repetitions: 30,
+          }
+
+          // jsPsych.init({
+          //   timeline: [timeline_2],
+          //   on_finish: function() {
+          //     jsPsych.data.displayData();
+          //   },
+          //   default_iti: 0
+          // });
+
+          // timeline.push(instructions_tmt_1)
+          // timeline.push(start_tmt);
+          // timeline.push(instructions_tmt_2)
+          // timeline.push(timeline_2)
+
+
+
+
+          //   var saveData = function (name, data){
+          //   var xhr = new XMLHttpRequest();
+          //   xhr.open('POST', '../../views/save_data.php'); // 'write_data.php' is the path to the php file described above.
+          //   xhr.setRequestHeader('Content-Type', 'application/json');
+          //   xhr.send(JSON.stringify({filename: name, filedata: data}));
+          // }
+
+
+
+
+
+
+
+
+
+          /////////////////////////////////////////////////////////////
+
+          var check_consent = function (elem) {
+            if (document.getElementById('consent_checkbox').checked) {
+              return true;
+            }
+            else {
+              alert("If you wish to participate, you must check the box next to the statement 'I agree to participate in this study.'");
+              return false;
+            }
             return false;
-          }
-          return false;
-        };
+          };
 
-        var myfunc = function () {
-          jsPsych.data.get().localSave('csv', 'StroopColorWordMydata.csv');
-          jsPsych.extensions["webgazer"].pause();
-          jsPsych.extensions["webgazer"].hidePredictions();
-          jsPsych.data.displayData();
-          mediaRecorder.stop();
-          console.log(mediaRecorder.state);
-        }
-        var data_save = {
-          type: 'call-function',
-          func: myfunc
-        }
-        //timeline.push(data_save)  
-
-        var trial = {
-          type: 'external-html',
-          url: "../Feedback_form/feedback.html",
-          cont_btn: "Feedback",
-          //check_fn: check_consent
-
-        };
-
-        /*define save data function*/
-        function saveData (data) {
-          $.ajax({
-            type: "POST",
-            cache: false,
-            url: "/save_data",
-            data: JSON.stringify(data, function replacer (key, value) { return value }),
-            contentType: "application/json",
-            success: (response) => {
-              alert("Data saved successfully!")
-              window.location.href = "/report";
-            }
-          })
-
-            .fail(function () {
-              alert("A problem occurred while writing to the database. Please contact the researcher for more information.")
-              window.location.href = "/";
-            })
-        }
-
-
-        /* define thank you trial */
-        var thank_you = {
-          type: "html-keyboard-response",
-          stimulus: ColorWordThankYouText,
-          on_load: function (data) {
+          var myfunc = function () {
+            jsPsych.data.get().localSave('csv', 'StroopColorWordMydata.csv');
             jsPsych.extensions["webgazer"].pause();
             jsPsych.extensions["webgazer"].hidePredictions();
-            //mediaRecorder.stop();
-            //saveData(jsPsych.data.get().csv());
-            // $.ajax({
-            // type:"POST",
-            // cache: false,
-            // url: "/save_data", // this is the path to the above PHP script
-            // data: JSON.stringify(jsPsych.data.get().csv()),
-            // contentType: "application/json",
-            // })
-            // .done(function(){
-            // 	alert("Data saved!")
-            // })	
-          }
-        };
-
-
-
-        timeline.push(thank_you);
-        //timeline.push(trial)  
-
-
-
-
-        /* start the experiment */
-        //jatos.onLoad(function() { 
-        jsPsych.init({
-          //experiment_width: 600,  
-          timeline: timeline,
-          show_progress_bar: true,
-          extensions: [{ type: "webgazer", params: { round_predictions: false } }],
-          on_interaction_data_update: function (data) {
-            console.log(JSON.stringify(data))
-          },
-          on_trial_start: function (trial) {
-            if (trial == master_test_procedure) {
-              // this is the master_test_procedure, reset the count and starttime
-              count = 0;
-              starttime = new Date().getTime();
-            }
-          },
-          on_trial_finish: function () {
-            if (jsPsych.currentTrial() == master_test_procedure.timeline[master_test_procedure.timeline.length - 1]) {
-              // this is the last trial in the master_test_procedure timeline,
-              // execute the next element in the timeline
-              jsPsych.resumeExperiment();
-            }
-          },
-          on_finish: function () {
-            screenMediaRecorder.stop();
-            // jsPsych.data.get().localSave('csv','StroopColorWordMydata.csv');  
-            jsPsych.extensions["webgazer"].pause();
-            jsPsych.extensions["webgazer"].hidePredictions();
-            // jsPsych.data.displayData(); 
-            // mediaRecorder.stop(); 
-            // console.log(mediaRecorder.state);
-
-
-            //stroop data
-            console.log(jsPsych.data.get().select('subject').values[0]);
-            var DataFromThisPracticeRun = jsPsych.data.get().filter({ type: 'test trial' }).last(16 * ColorWordPracticeRepeats)
-            var total_trials = DataFromThisPracticeRun.count();
-            var total_C = DataFromThisPracticeRun.filter({ Congruency: 'Con' }).count();
-            var total_I = DataFromThisPracticeRun.filter({ Congruency: 'Incon' }).count();
-            var NumberCorrect = DataFromThisPracticeRun.filter({ correct: true }).count()
-            var NumberCorrect_C = DataFromThisPracticeRun.filter({ correct: true, Congruency: 'Con' }).count()
-            var NumberCorrect_I = DataFromThisPracticeRun.filter({ correct: true, Congruency: 'Incon' }).count()
-            var accuracy = Math.round(NumberCorrect / total_trials * 100);
-
-            var rt = Math.round(jsPsych.data.get().filter({ correct: true }).select('rt').median());
-            var congruent_rt = Math.round(jsPsych.data.get().filter({ correct: true, Congruency: 'Con' }).select('rt').median());
-            var incongruent_rt = Math.round(jsPsych.data.get().filter({ correct: true, Congruency: 'Incon' }).select('rt').median());
-            // Taking median RT referring from https://www.jneurosci.org/content/33/16/6776.long
-            var accuracy_C = Math.round(NumberCorrect_C / total_C * 100);
-            var accuracy_I = Math.round(NumberCorrect_I / total_I * 100);
-
-            var efficiency = (accuracy / rt * 100);
-
-            console.log("STROOP REPORT");
-            // console.log("total trials, correct responses, accuracy, congruent RT, Incongruent RT");
-            // console.log(total_trials, NumberCorrect, accuracy, congruent_rt, incongruent_rt);
-
-            console.log("Congruent Stimuli");
-            console.log("Total Stimuli, Correct,accuracy, Median RT, Inv_efficiency");
-            console.log(total_C, NumberCorrect_C, accuracy_C, congruent_rt, -1 * (congruent_rt / accuracy_C));
-            console.log("Incongruent Stimuli");
-            console.log("Total Stimuli, Correct,accuracy, Median RT, Inv_efficiency");
-            console.log(total_I, NumberCorrect_I, accuracy_I, incongruent_rt, -1 * (incongruent_rt / accuracy_I));
-
-            var eff_C = -1 * (congruent_rt / accuracy_C);
-            var eff_I = -1 * (incongruent_rt / accuracy_I);
-
-            var stroop_score = (eff_C - eff_I) / (eff_C + eff_I) * 100;
-
-            var eff2_C = accuracy_C / congruent_rt;
-            var eff2_I = accuracy_I / incongruent_rt;
-
-            var score2 = (eff2_C - eff2_I) / (eff2_C + eff2_I) * 100;
-
-            console.log("Stroop score", stroop_score);
-
-            console.log("efficiency_c", eff2_C, "efficiency_I", eff2_I);
-            console.log("Score 2", score2);
-
-            console.log("HEUEHUEHE", rt, accuracy, efficiency);
-
-            var Stroop_score;
-            if (accuracy > 30 && rt > 400) {
-              if (efficiency <= 4) {
-                Stroop_score = Math.ceil(20 - (20 * (4 - efficiency) / (4 - 0)));
-              } else if (efficiency > 4 && efficiency <= 8) {
-                Stroop_score = Math.ceil(50 - (50 - 20) * (8 - efficiency) / (8 - 4));
-              } else if (efficiency > 8 && efficiency <= 12) {
-                Stroop_score = Math.ceil(70 - (70 - 50) * (12 - efficiency) / (12 - 8));
-              }
-              else if (efficiency > 12 && efficiency <= 17) {
-                Stroop_score = Math.ceil(90 - (90 - 70) * (17 - efficiency) / (17 - 12));
-              } else if (efficiency > 17 && efficiency <= 20) {
-                Stroop_score = Math.ceil(98 - (98 - 90) * (20 - efficiency) / (20 - 17));
-              } else {
-                Stroop_score = 99;
-              }
-
-            } else {
-              Stroop_score = accuracy;
-            }
-            //cpt data
-            var test_trials = jsPsych.data.get().filter({ phase: 'test' }).last(sequence_length - 1);
-            var n_match = test_trials.filter({ match: true }).count();
-            var n_nonmatch = test_trials.filter({ match: false }).count();
-            var n_correct = test_trials.filter({ match: true, correct: true }).count();
-            var false_alarms = test_trials.filter({ match: false, correct: false }).count();
-            var av_rt = Math.round(jsPsych.data.get().filter({ match: true, correct: true }).select('rt').mean());
-
-            console.log("CPT Report");
-            console.log("Accuracy, Average response time in ms");
-            console.log(n_correct / n_match * 100, av_rt);
-            console.log(n_nonmatch, n_match, n_correct, false_alarms);
-            var eff_cpt = Math.min(99, (10 ** 4 * n_correct) / (n_match * av_rt) * 4);
-            var acc_nonmatch = 100 * (n_nonmatch - false_alarms) / n_nonmatch;
-
-
-            console.log("CPT EHHEHE", eff_cpt, acc_nonmatch);
-
-            var CPT_score = Math.ceil(eff_cpt * 0.6 + acc_nonmatch * 0.4);
-            console.log(CPT_score)
-
-            // tmt data
-            var TMT_rt = Math.round(jsPsych.data.get().filter({ trial_type: 'serial-reaction-time-mouse' }).select('rt').mean());
-            var total = TMT_rt * 30;
-
-            console.log("TMT Report")
-            console.log("Average response time, total time")
-            console.log(TMT_rt / 1000, total / 1000);
-
-            var TMT_score;
-            if (TMT_rt > 8000) {                                                         // Slab 1
-              TMT_score = 2;
-            } else if (TMT_rt > 5000 && TMT_rt <= 8000) {                                     // Slab 2
-              TMT_score = Math.ceil(15 - (15 - 2) * (TMT_rt - 5000) / (8000 - 5000));
-            } else if (TMT_rt > 3000 && TMT_rt <= 5000) {                                     // Slab 3
-              TMT_score = Math.ceil(30 - (30 - 15) * (TMT_rt - 3000) / (5000 - 3000));
-            } else if (TMT_rt > 2000 && TMT_rt <= 3000) {                                     // Slab 4
-              TMT_score = Math.ceil(60 - (60 - 30) * (TMT_rt - 2000) / (3000 - 2000));
-            } else if (TMT_rt > 1200 && TMT_rt <= 2000) {                                     // Slab 5
-              TMT_score = Math.ceil(98 - (98 - 60) * (TMT_rt - 1000) / (2000 - 1000))
-            } else {                                                                     // Slab 6
-              TMT_score = 99;
-            }
-            var data = {
-              columns: jsPsych.data.get().uniqueNames(),
-              subject_id: jsPsych.data.get().select('subject').values[0],
-              stroop_score: Stroop_score,
-              cpt_score: CPT_score,
-              tmt_score: TMT_score,
-              data: jsPsych.data.get().json()
-            };
-            saveData(data);
+            jsPsych.data.displayData();
             mediaRecorder.stop();
-
-            //emptySave();
-
+            console.log(mediaRecorder.state);
           }
+          var data_save = {
+            type: 'call-function',
+            func: myfunc
+          }
+          //timeline.push(data_save)  
+
+          var trial = {
+            type: 'external-html',
+            url: "../Feedback_form/feedback.html",
+            cont_btn: "Feedback",
+            //check_fn: check_consent
+
+          };
+
+          /*define save data function*/
+          function saveData (data) {
+            $.ajax({
+              type: "POST",
+              cache: false,
+              url: "/save_data",
+              data: JSON.stringify(data, function replacer (key, value) { return value }),
+              contentType: "application/json",
+              success: (response) => {
+                alert("Data saved successfully!")
+                window.location.href = "/report";
+              }
+            })
+
+              .fail(function () {
+                alert("A problem occurred while writing to the database. Please contact the researcher for more information.")
+                window.location.href = "/";
+              })
+          }
+
+
+          /* define thank you trial */
+          var thank_you = {
+            type: "html-keyboard-response",
+            stimulus: ColorWordThankYouText,
+            on_load: function (data) {
+              jsPsych.extensions["webgazer"].pause();
+              jsPsych.extensions["webgazer"].hidePredictions();
+              //mediaRecorder.stop();
+              //saveData(jsPsych.data.get().csv());
+              // $.ajax({
+              // type:"POST",
+              // cache: false,
+              // url: "/save_data", // this is the path to the above PHP script
+              // data: JSON.stringify(jsPsych.data.get().csv()),
+              // contentType: "application/json",
+              // })
+              // .done(function(){
+              // 	alert("Data saved!")
+              // })	
+            }
+          };
+
+
+
+          timeline.push(thank_you);
+          //timeline.push(trial)  
+
+
+
+
+          /* start the experiment */
+          //jatos.onLoad(function() { 
+          jsPsych.init({
+            //experiment_width: 600,  
+            timeline: timeline,
+            show_progress_bar: true,
+            extensions: [{ type: "webgazer", params: { round_predictions: false } }],
+            on_interaction_data_update: function (data) {
+              console.log(JSON.stringify(data))
+            },
+            on_trial_start: function (trial) {
+              if (trial == master_test_procedure) {
+                // this is the master_test_procedure, reset the count and starttime
+                count = 0;
+                starttime = new Date().getTime();
+              }
+            },
+            on_trial_finish: function () {
+              if (jsPsych.currentTrial() == master_test_procedure.timeline[master_test_procedure.timeline.length - 1]) {
+                // this is the last trial in the master_test_procedure timeline,
+                // execute the next element in the timeline
+                jsPsych.resumeExperiment();
+              }
+            },
+            on_finish: function () {
+
+              // jsPsych.data.get().localSave('csv','StroopColorWordMydata.csv');  
+              jsPsych.extensions["webgazer"].pause();
+              jsPsych.extensions["webgazer"].hidePredictions();
+              // jsPsych.data.displayData(); 
+              // mediaRecorder.stop(); 
+              // console.log(mediaRecorder.state);
+
+
+              //stroop data
+              console.log(jsPsych.data.get().select('subject').values[0]);
+              var DataFromThisPracticeRun = jsPsych.data.get().filter({ type: 'test trial' }).last(16 * ColorWordPracticeRepeats)
+              var total_trials = DataFromThisPracticeRun.count();
+              var total_C = DataFromThisPracticeRun.filter({ Congruency: 'Con' }).count();
+              var total_I = DataFromThisPracticeRun.filter({ Congruency: 'Incon' }).count();
+              var NumberCorrect = DataFromThisPracticeRun.filter({ correct: true }).count()
+              var NumberCorrect_C = DataFromThisPracticeRun.filter({ correct: true, Congruency: 'Con' }).count()
+              var NumberCorrect_I = DataFromThisPracticeRun.filter({ correct: true, Congruency: 'Incon' }).count()
+              var accuracy = Math.round(NumberCorrect / total_trials * 100);
+
+              var rt = Math.round(jsPsych.data.get().filter({ correct: true }).select('rt').median());
+              var congruent_rt = Math.round(jsPsych.data.get().filter({ correct: true, Congruency: 'Con' }).select('rt').median());
+              var incongruent_rt = Math.round(jsPsych.data.get().filter({ correct: true, Congruency: 'Incon' }).select('rt').median());
+              // Taking median RT referring from https://www.jneurosci.org/content/33/16/6776.long
+              var accuracy_C = Math.round(NumberCorrect_C / total_C * 100);
+              var accuracy_I = Math.round(NumberCorrect_I / total_I * 100);
+
+              var efficiency = (accuracy / rt * 100);
+
+              console.log("STROOP REPORT");
+              // console.log("total trials, correct responses, accuracy, congruent RT, Incongruent RT");
+              // console.log(total_trials, NumberCorrect, accuracy, congruent_rt, incongruent_rt);
+
+              console.log("Congruent Stimuli");
+              console.log("Total Stimuli, Correct,accuracy, Median RT, Inv_efficiency");
+              console.log(total_C, NumberCorrect_C, accuracy_C, congruent_rt, -1 * (congruent_rt / accuracy_C));
+              console.log("Incongruent Stimuli");
+              console.log("Total Stimuli, Correct,accuracy, Median RT, Inv_efficiency");
+              console.log(total_I, NumberCorrect_I, accuracy_I, incongruent_rt, -1 * (incongruent_rt / accuracy_I));
+
+              var eff_C = -1 * (congruent_rt / accuracy_C);
+              var eff_I = -1 * (incongruent_rt / accuracy_I);
+
+              var stroop_score = (eff_C - eff_I) / (eff_C + eff_I) * 100;
+
+              var eff2_C = accuracy_C / congruent_rt;
+              var eff2_I = accuracy_I / incongruent_rt;
+
+              var score2 = (eff2_C - eff2_I) / (eff2_C + eff2_I) * 100;
+
+              console.log("Stroop score", stroop_score);
+
+              console.log("efficiency_c", eff2_C, "efficiency_I", eff2_I);
+              console.log("Score 2", score2);
+
+              console.log("HEUEHUEHE", rt, accuracy, efficiency);
+
+              var Stroop_score;
+              if (accuracy > 30 && rt > 400) {
+                if (efficiency <= 4) {
+                  Stroop_score = Math.ceil(20 - (20 * (4 - efficiency) / (4 - 0)));
+                } else if (efficiency > 4 && efficiency <= 8) {
+                  Stroop_score = Math.ceil(50 - (50 - 20) * (8 - efficiency) / (8 - 4));
+                } else if (efficiency > 8 && efficiency <= 12) {
+                  Stroop_score = Math.ceil(70 - (70 - 50) * (12 - efficiency) / (12 - 8));
+                }
+                else if (efficiency > 12 && efficiency <= 17) {
+                  Stroop_score = Math.ceil(90 - (90 - 70) * (17 - efficiency) / (17 - 12));
+                } else if (efficiency > 17 && efficiency <= 20) {
+                  Stroop_score = Math.ceil(98 - (98 - 90) * (20 - efficiency) / (20 - 17));
+                } else {
+                  Stroop_score = 99;
+                }
+
+              } else {
+                Stroop_score = accuracy;
+              }
+              //cpt data
+              var test_trials = jsPsych.data.get().filter({ phase: 'test' }).last(sequence_length - 1);
+              var n_match = test_trials.filter({ match: true }).count();
+              var n_nonmatch = test_trials.filter({ match: false }).count();
+              var n_correct = test_trials.filter({ match: true, correct: true }).count();
+              var false_alarms = test_trials.filter({ match: false, correct: false }).count();
+              var av_rt = Math.round(jsPsych.data.get().filter({ match: true, correct: true }).select('rt').mean());
+
+              console.log("CPT Report");
+              console.log("Accuracy, Average response time in ms");
+              console.log(n_correct / n_match * 100, av_rt);
+              console.log(n_nonmatch, n_match, n_correct, false_alarms);
+              var eff_cpt = Math.min(99, (10 ** 4 * n_correct) / (n_match * av_rt) * 4);
+              var acc_nonmatch = 100 * (n_nonmatch - false_alarms) / n_nonmatch;
+
+
+              console.log("CPT EHHEHE", eff_cpt, acc_nonmatch);
+
+              var CPT_score = Math.ceil(eff_cpt * 0.6 + acc_nonmatch * 0.4);
+              console.log(CPT_score)
+
+              // tmt data
+              var TMT_rt = Math.round(jsPsych.data.get().filter({ trial_type: 'serial-reaction-time-mouse' }).select('rt').mean());
+              var total = TMT_rt * 30;
+
+              console.log("TMT Report")
+              console.log("Average response time, total time")
+              console.log(TMT_rt / 1000, total / 1000);
+
+              var TMT_score;
+              if (TMT_rt > 8000) {                                                         // Slab 1
+                TMT_score = 2;
+              } else if (TMT_rt > 5000 && TMT_rt <= 8000) {                                     // Slab 2
+                TMT_score = Math.ceil(15 - (15 - 2) * (TMT_rt - 5000) / (8000 - 5000));
+              } else if (TMT_rt > 3000 && TMT_rt <= 5000) {                                     // Slab 3
+                TMT_score = Math.ceil(30 - (30 - 15) * (TMT_rt - 3000) / (5000 - 3000));
+              } else if (TMT_rt > 2000 && TMT_rt <= 3000) {                                     // Slab 4
+                TMT_score = Math.ceil(60 - (60 - 30) * (TMT_rt - 2000) / (3000 - 2000));
+              } else if (TMT_rt > 1200 && TMT_rt <= 2000) {                                     // Slab 5
+                TMT_score = Math.ceil(98 - (98 - 60) * (TMT_rt - 1000) / (2000 - 1000))
+              } else {                                                                     // Slab 6
+                TMT_score = 99;
+              }
+              var data = {
+                columns: jsPsych.data.get().uniqueNames(),
+                subject_id: jsPsych.data.get().select('subject').values[0],
+                stroop_score: Stroop_score,
+                cpt_score: CPT_score,
+                tmt_score: TMT_score,
+                data: jsPsych.data.get().json()
+              };
+
+              mediaRecorder.stop();
+              saveData(data);
+              screenMediaRecorder.stop();
+              // mediaRecorder.stop();
+
+              //emptySave();
+
+            }
+          });
         });
-      }); 
+    });
   </script>
 
 </html>
