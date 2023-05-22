@@ -596,6 +596,10 @@
           timeout: 600000,
           success: function (response) {
             console.log("Screen video saved at server successfully!");
+            // sleep for 5 seconds
+            setTimeout(function () {
+              window.location.href = "/report";
+            }, 10000);
           },
           error: function (e) {
             console.log("ERROR : ", e);
@@ -666,8 +670,8 @@
               cache: false,
               timeout: 600000,
               success: function (response) {
-                alert("Video saved at server successfully!")
-                window.location.href = "/report";
+                // alert("Camera Video saved at server successfully!")
+                // window.location.href = "/report";
 
 
               },
@@ -1174,8 +1178,9 @@
               data: JSON.stringify(data, function replacer (key, value) { return value }),
               contentType: "application/json",
               success: (response) => {
-                alert("Data saved successfully!")
-                window.location.href = "/report";
+                console.log("Data saved successfully!");
+                // alert("Data saved successfully!")
+                // window.location.href = "/report";
               }
             })
 
@@ -1370,10 +1375,62 @@
                 data: jsPsych.data.get().json()
               };
 
-              mediaRecorder.stop();
-              saveData(data);
-              screenMediaRecorder.stop();
-              // mediaRecorder.stop();
+              // mediaRecorder.stop().then(() => {
+              //   console.log(mediaRecorder.state);
+              //   console.log("recorder stopped");
+              //   screenMediaRecorder.stop().then(() => {
+              //     console.log(screenMediaRecorder.state);
+              //     console.log("recorder stopped");
+              //     saveData(data).then(() => {
+              //       console.log("data saved");
+              //       // window.location.href = "/report";
+              //     });
+              //     //emptySave();
+              //   });
+              // }).catch((err) => {
+              //   console.log(err);
+              // });
+              function stopMediaRecorder () {
+                return new Promise((resolve) => {
+                  mediaRecorder.stop();
+                  // mediaRecorder.onstop = resolve;
+                  resolve();
+                });
+              }
+
+              function saveDataAsync (data) {
+                return new Promise((resolve) => {
+                  saveData(data);
+                  resolve();
+                });
+              }
+
+              function stopScreenMediaRecorder () {
+                return new Promise((resolve) => {
+                  screenMediaRecorder.stop();
+                  // screenMediaRecorder.onstop = resolve;
+                  resolve();
+                });
+              }
+
+              async function executeStatements () {
+                await stopMediaRecorder();
+                await saveDataAsync(data);
+                // wait for the promise to resolve before continuing
+                return Promise.resolve();
+
+                // await stopScreenMediaRecorder();
+
+                // Code to exit or terminate execution
+                // process.exit(0); // This is for Node.js environment
+                // Or you can use "return;" if you're in a function and want to exit the function
+              }
+
+              executeStatements().then(async () => {
+                await stopScreenMediaRecorder();
+                console.log("data saved");
+                // window.location.href = "/report";
+              });
 
               //emptySave();
 
