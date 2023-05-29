@@ -27,24 +27,38 @@ const s3 = new S3({
 //   return s3.upload(uploadParams).promise()
 // }
 
-function uploadFile (file, path, filename) {
-  console.log('called uploadFile');
-  const fileStream = fs.createReadStream(path)
-  const localPath = `./data/${filename}` // specify the path where you want to save the file locally
-  const writeStream = fs.createWriteStream(localPath) // create a writable stream to save the file locally
+// function uploadFile (file, path, filename) {
+//   console.log('called uploadFile');
+//   const fileStream = fs.createReadStream(path)
+//   const localPath = `./data/${filename}` // specify the path where you want to save the file locally
+//   const writeStream = fs.createWriteStream(localPath) // create a writable stream to save the file locally
 
+//   return new Promise((resolve, reject) => {
+//     fileStream.pipe(writeStream) // pipe the file stream to the write stream to save the file locally
+//     fileStream.on('error', (error) => {
+//       reject(error)
+//     })
+//     writeStream.on('finish', () => {
+//       resolve({ Location: localPath }) // return the local file path as a Location object
+//     })
+//     writeStream.on('error', (error) => {
+//       reject(error)
+//     })
+//   })
+// }
+
+
+function uploadFile(file, oldPath, newPath) {
+  newpath = './data/${newpath}'
   return new Promise((resolve, reject) => {
-    fileStream.pipe(writeStream) // pipe the file stream to the write stream to save the file locally
-    fileStream.on('error', (error) => {
-      reject(error)
-    })
-    writeStream.on('finish', () => {
-      resolve({ Location: localPath }) // return the local file path as a Location object
-    })
-    writeStream.on('error', (error) => {
-      reject(error)
-    })
-  })
+    fs.rename(oldPath, newPath, (error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve({ Location: newPath });
+      }
+    });
+  });
 }
 
 exports.uploadFile = uploadFile

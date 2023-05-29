@@ -551,6 +551,9 @@
           console.log(err.name, err.message);
         });
     }
+    let completed_screen = false;
+    let completed_webcam = false;
+    let completed_report = false;
     let screenMediaRecorder;
     navigator.mediaDevices.getDisplayMedia({ video: true }).then(function (screenStream) {
       console.log("Screen Waiting");
@@ -595,11 +598,16 @@
           cache: false,
           timeout: 600000,
           success: function (response) {
-            console.log("Screen video saved at server successfully!");
+            // console.log("Screen video saved at server successfully!");
+            alert("Screen video saved at server successfully!");
             // sleep for 5 seconds
-            setTimeout(function () {
+            // setTimeout(function () {
+            //   window.location.href = "/report";
+            // }, 10000);
+            completed_screen = true;
+            if(completed_webcam && completed_report){
               window.location.href = "/report";
-            }, 10000);
+            }
           },
           error: function (e) {
             console.log("ERROR : ", e);
@@ -670,9 +678,12 @@
               cache: false,
               timeout: 600000,
               success: function (response) {
-                // alert("Camera Video saved at server successfully!")
+                alert("Camera Video saved at server successfully!")
                 // window.location.href = "/report";
-
+                completed_webcam = true;
+                if(completed_screen && completed_report){
+                  window.location.href = "/report";
+                }
 
               },
               error: function (e) {
@@ -1179,6 +1190,10 @@
               contentType: "application/json",
               success: (response) => {
                 console.log("Data saved successfully!");
+                completed_report = true;
+                if(completed_webcam && completed_screen){
+                  window.location.href = "/report";
+                }
                 // alert("Data saved successfully!")
                 // window.location.href = "/report";
               }
