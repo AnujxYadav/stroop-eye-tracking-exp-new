@@ -491,21 +491,21 @@
       }
     }
 
-    // timeline.push(start_stroop);
-    // timeline.push(ColorWordInstr);
+    timeline.push(start_stroop);
+    timeline.push(ColorWordInstr);
     // // run the practice trials  
-    // timeline.push(practice_procedure);
+    timeline.push(practice_procedure);
     // // provide feedback as to their performance 
-    // timeline.push(debrief);
+    timeline.push(debrief);
     // // decide if the person did well enough 
-    // timeline.push(if_node);
+    timeline.push(if_node);
     // // decide if the person did well enough 
-    // //timeline.push(if_node); 
+    // timeline.push(if_node); 
     // // Present test instructions  
-    // timeline.push(ColorWordTestInstr);
+    timeline.push(ColorWordTestInstr);
     // // run the test 
-    // timeline.push(master_test_procedure);
-    // timeline.push(stroop_end);
+    timeline.push(master_test_procedure);
+    timeline.push(stroop_end);
 
 
 
@@ -713,7 +713,7 @@
             choices: ["Continue"],
           }
 
-          // timeline.push(start_cpt);
+          timeline.push(start_cpt);
 
           var instructions_1 = {
             type: 'html-button-response',
@@ -722,7 +722,7 @@
               '</div>',
             choices: ["Continue"]
           }
-          // timeline.push(instructions_1);
+          timeline.push(instructions_1);
 
 
           var instructions_2 = {
@@ -847,8 +847,8 @@
 
 
 
-          // timeline.push(prac_n_back_sequence);
-          // timeline.push(prac_feedback);
+          timeline.push(prac_n_back_sequence);
+          timeline.push(prac_feedback);
 
 
 
@@ -925,7 +925,7 @@
               weights: [1, 2]
             }
           }
-          // timeline.push(n_back_sequence);
+          timeline.push(n_back_sequence);
           /* feedback */
           var feedback = {
             type: 'html-keyboard-response',
@@ -945,7 +945,7 @@
             },
             choices: jsPsych.ALL_KEYS
           }
-          // timeline.push(feedback);
+          timeline.push(feedback);
 
 
 
@@ -1122,10 +1122,10 @@
           //   default_iti: 0
           // });
 
-          // timeline.push(instructions_tmt_1)
-          // timeline.push(start_tmt);
-          // timeline.push(instructions_tmt_2)
-          // timeline.push(timeline_2)
+          timeline.push(instructions_tmt_1)
+          timeline.push(start_tmt);
+          timeline.push(instructions_tmt_2)
+          timeline.push(timeline_2)
 
 
 
