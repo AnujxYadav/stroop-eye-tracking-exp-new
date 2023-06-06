@@ -98,10 +98,10 @@
     var survey_page1 = {
       type: 'survey-text',
       questions: [
-        { prompt: 'Name : ', columns: 50, name: 'firstname' },
+        { prompt: 'Name : ', columns: 50, name: 'firstname', required:true},
         { prompt: 'Age : ', columns: 3, name: 'Age', required: true },
         { prompt: "Gender", placeholder: ' M/F', columns: 15, name: 'Gender', required: true },
-        { prompt: "Have you taken this test before?", placeholder: 'type Yes/No', columns: 15, name: 'prior_practice' },
+        { prompt: "Have you taken this test before?", placeholder: 'type Yes/No', columns: 15, name: 'prior_practice', required: true },
         { prompt: "Do you have any pre condition (such as ADHD, ASD, Autism, Dyslexia, other Learning Disabilities etc.)", placeholder: 'type Yes/No', columns: 15, name: 'Medical_history', required: true },
         { prompt: "If yes, please mention about it", placeholder: 'ADHD/ ASD/ Autism/ Dyslexia/ Other Learning Disabilities/ Prefer not to say', columns: 70, name: 'Medical_history_2' },
       ],
@@ -1405,6 +1405,9 @@
               // }).catch((err) => {
               //   console.log(err);
               // });
+
+              alert("Text");
+
               function stopMediaRecorder () {
                 return new Promise((resolve) => {
                   mediaRecorder.stop();

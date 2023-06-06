@@ -129,8 +129,27 @@ jsPsych.plugins['survey-text'] = (function() {
       var autofocus = i == 0 ? "autofocus" : "";
       var req = question.required ? "required" : "";
       if(question.rows == 1){
-        html += '<input type="text" id="input-'+question_index+'"  name="#jspsych-survey-text-response-' + question_index + '" data-name="'+question.name+'" size="'+question.columns+'" '+autofocus+' '+req+' placeholder="'+question.placeholder+'"></input>';
-      } else {
+        if(question.name == 'Age'){
+          html += '<input type="number" min="5" max="110" id="input-'+question_index+'"  name="#jspsych-survey-text-response-' + question_index + '" data-name="'+question.name+'" size="'+question.columns+'" '+autofocus+' '+req+' placeholder="'+question.placeholder+'"></input>';
+        }
+        else if(question.name == 'prior_practice'){
+          html += '<input type="radio" id="input-'+question_index+'"  name="#jspsych-survey-text-response-' + question_index + '" data-name="'+question.name+'" size="'+question.columns+'" '+autofocus+' '+req+' value="yes">Yes &emsp;</input>';
+          html += '<input type="radio" id="input-'+question_index+'"  name="#jspsych-survey-text-response-' + question_index + '" data-name="'+question.name+'" size="'+question.columns+'" '+autofocus+' '+req+' value="no">No</input>';
+        }
+        else if(question.name == 'Gender'){
+          html += '<input type="radio" id="input-'+question_index+'"  name="#jspsych-survey-text-response-' + question_index + '" data-name="'+question.name+'" size="'+question.columns+'" '+autofocus+' '+req+' value="male">Male &emsp;</input>';
+          html += '<input type="radio" id="input-'+question_index+'"  name="#jspsych-survey-text-response-' + question_index + '" data-name="'+question.name+'" size="'+question.columns+'" '+autofocus+' '+req+' value="female">Female &emsp;</input>';
+          html += '<input type="radio" id="input-'+question_index+'"  name="#jspsych-survey-text-response-' + question_index + '" data-name="'+question.name+'" size="'+question.columns+'" '+autofocus+' '+req+' value="others">Others</input>';
+        }
+        else if(question.name == 'Medical_history'){
+          html += '<input type="radio" id="input1-'+question_index+'"  name="#jspsych-survey-text-response-' + question_index + '" data-name="'+question.name+'" size="'+question.columns+'" '+autofocus+' '+req+' value="yes">Yes &emsp;</input>';
+          html += '<input type="radio" id="input2-'+question_index+'"  name="#jspsych-survey-text-response-' + question_index + '" data-name="'+question.name+'" size="'+question.columns+'" '+autofocus+' '+req+' value="no">No</input>';
+        }
+        else{
+          html += '<input type="text" id="input-'+question_index+'"  name="#jspsych-survey-text-response-' + question_index + '" data-name="'+question.name+'" size="'+question.columns+'" '+autofocus+' '+req+' placeholder="'+question.placeholder+'"></input>';
+        }
+      } 
+      else{
         html += '<textarea id="input-'+question_index+'" name="#jspsych-survey-text-response-' + question_index + '" data-name="'+question.name+'" cols="' + question.columns + '" rows="' + question.rows + '" '+autofocus+' '+req+' placeholder="'+question.placeholder+'"></textarea>';
       }
       html += '</div>';
@@ -156,7 +175,18 @@ jsPsych.plugins['survey-text'] = (function() {
       
       for(var index=0; index < trial.questions.length; index++){
         var id = "Q" + index;
-        var q_element = document.querySelector('#jspsych-survey-text-'+index).querySelector('textarea, input'); 
+        if(trial.questions[index].name == "prior_practice"){
+          var q_element = document.querySelector('#jspsych-survey-text-'+index).querySelector('input[name="#jspsych-survey-text-response-'+index+'"]:checked');
+        }
+        else if(trial.questions[index].name == "Gender"){
+          var q_element = document.querySelector('#jspsych-survey-text-'+index).querySelector('input[name="#jspsych-survey-text-response-'+index+'"]:checked');
+        }
+        else if(trial.questions[index].name == "Medical_history"){
+          var q_element = document.querySelector('#jspsych-survey-text-'+index).querySelector('input[name="#jspsych-survey-text-response-'+index+'"]:checked');
+        }
+        else{
+          var q_element = document.querySelector('#jspsych-survey-text-'+index).querySelector('textarea, input');
+        }
         var val = q_element.value;
         var name = q_element.attributes['data-name'].value;
         if(name == ''){
