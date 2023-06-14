@@ -206,6 +206,7 @@ jsPsych.plugins['survey-text'] = (function() {
 
       // next trial
       jsPsych.finishTrial(trialdata);
+      
     });
 
     var startTime = performance.now();

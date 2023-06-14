@@ -18,6 +18,8 @@
     "json2csv": "^5.0.6",
     "multer": "^1.4.3",
     "nodemailer": "^6.6.3",
+    "papa": "0.0.0",
+    "papaparse": "^5.4.1",
     "pm2": "^5.3.0",
     "request": "^2.88.2"
   },

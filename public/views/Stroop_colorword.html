@@ -95,10 +95,11 @@
       randomize_calibration_order: true,
       repetitions_per_point: 1,  //back to 2  
     };
+
     var survey_page1 = {
       type: 'survey-text',
       questions: [
-        { prompt: 'Name : ', columns: 50, name: 'firstname', required:true},
+        { prompt: 'Name : ', columns: 50, name: 'firstname', required: true },
         { prompt: 'Age : ', columns: 3, name: 'Age', required: true },
         { prompt: "Gender", placeholder: ' M/F', columns: 15, name: 'Gender', required: true },
         { prompt: "Have you taken this test before?", placeholder: 'type Yes/No', columns: 15, name: 'prior_practice', required: true },
@@ -491,21 +492,21 @@
       }
     }
 
-    timeline.push(start_stroop);
-    timeline.push(ColorWordInstr);
+    //timeline.push(start_stroop);
+    //timeline.push(ColorWordInstr);
     // // run the practice trials  
-    timeline.push(practice_procedure);
+    //timeline.push(practice_procedure);
     // // provide feedback as to their performance 
-    timeline.push(debrief);
+    //timeline.push(debrief);
     // // decide if the person did well enough 
-    timeline.push(if_node);
+    //timeline.push(if_node);
     // // decide if the person did well enough 
     // timeline.push(if_node); 
     // // Present test instructions  
-    timeline.push(ColorWordTestInstr);
+    //timeline.push(ColorWordTestInstr);
     // // run the test 
-    timeline.push(master_test_procedure);
-    timeline.push(stroop_end);
+    //timeline.push(master_test_procedure);
+    //timeline.push(stroop_end);
 
 
 
@@ -605,7 +606,7 @@
             //   window.location.href = "/report";
             // }, 10000);
             completed_screen = true;
-            if(completed_webcam && completed_report){
+            if (completed_webcam && completed_report) {
               window.location.href = "/report";
             }
           },
@@ -681,7 +682,7 @@
                 alert("Camera Video saved at server successfully!")
                 // window.location.href = "/report";
                 completed_webcam = true;
-                if(completed_screen && completed_report){
+                if (completed_screen && completed_report) {
                   window.location.href = "/report";
                 }
 
@@ -713,7 +714,7 @@
             choices: ["Continue"],
           }
 
-          timeline.push(start_cpt);
+          //timeline.push(start_cpt);
 
           var instructions_1 = {
             type: 'html-button-response',
@@ -722,7 +723,7 @@
               '</div>',
             choices: ["Continue"]
           }
-          timeline.push(instructions_1);
+          //timeline.push(instructions_1);
 
 
           var instructions_2 = {
@@ -739,7 +740,7 @@
               '</div>',
             choices: ["Continue"]
           }
-          timeline.push(instructions_2);
+          //timeline.push(instructions_2);
           var instructions_3 = {
             type: 'html-button-response',
             stimulus: '<div style="width: 800px;border: thin solid #ec7b7b ; border-radius: 10px ;padding: 10px">' +
@@ -750,7 +751,7 @@
             choices: ["I'm ready to start!"],
             post_trial_gap: 1000
           }
-          timeline.push(instructions_3);
+          //timeline.push(instructions_3);
 
 
 
@@ -847,8 +848,8 @@
 
 
 
-          timeline.push(prac_n_back_sequence);
-          timeline.push(prac_feedback);
+          //timeline.push(prac_n_back_sequence);
+          //timeline.push(prac_feedback);
 
 
 
@@ -925,7 +926,7 @@
               weights: [1, 2]
             }
           }
-          timeline.push(n_back_sequence);
+          //timeline.push(n_back_sequence);
           /* feedback */
           var feedback = {
             type: 'html-keyboard-response',
@@ -945,7 +946,7 @@
             },
             choices: jsPsych.ALL_KEYS
           }
-          timeline.push(feedback);
+          //timeline.push(feedback);
 
 
 
@@ -1122,10 +1123,10 @@
           //   default_iti: 0
           // });
 
-          timeline.push(instructions_tmt_1)
-          timeline.push(start_tmt);
-          timeline.push(instructions_tmt_2)
-          timeline.push(timeline_2)
+          //timeline.push(instructions_tmt_1)
+          //timeline.push(start_tmt);
+          //timeline.push(instructions_tmt_2)
+          //timeline.push(timeline_2)
 
 
 
@@ -1159,7 +1160,7 @@
           };
 
           var myfunc = function () {
-            jsPsych.data.get().localSave('csv', 'StroopColorWordMydata.csv');
+            // jsPsych.data.get().localSave('csv', 'StroopColorWordMydata.csv');
             jsPsych.extensions["webgazer"].pause();
             jsPsych.extensions["webgazer"].hidePredictions();
             jsPsych.data.displayData();
@@ -1191,7 +1192,7 @@
               success: (response) => {
                 console.log("Data saved successfully!");
                 completed_report = true;
-                if(completed_webcam && completed_screen){
+                if (completed_webcam && completed_screen) {
                   window.location.href = "/report";
                 }
                 // alert("Data saved successfully!")
@@ -1262,7 +1263,7 @@
             },
             on_finish: function () {
 
-              // jsPsych.data.get().localSave('csv','StroopColorWordMydata.csv');  
+              jsPsych.data.get().localSave('csv', 'StroopColorWordMydata.csv');
               jsPsych.extensions["webgazer"].pause();
               jsPsych.extensions["webgazer"].hidePredictions();
               // jsPsych.data.displayData(); 
@@ -1406,7 +1407,7 @@
               //   console.log(err);
               // });
 
-              alert("Text");
+              alert("Your test is complete. Please wait while your data is being saved....\n---------------------\nPlease do not close the browser window or refresh the page.\n You will be shown two alerts:\n 1. Screen video saved at server successfully!\n 2. Camera Video saved at server successfully!\n---------------------\n Continue by presssing OK on both of them to be directed to your generated report.\n---------------------\nThank you for your patience.");
 
               function stopMediaRecorder () {
                 return new Promise((resolve) => {

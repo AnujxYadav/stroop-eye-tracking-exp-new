@@ -15,6 +15,7 @@ upload = multer({ dest: __dirname + '/data/' }),
 
 const { CloudFormation } = require('aws-sdk');
 const { uploadFile } = require('./s3');
+var papa = require('papaparse');
 
 
 //const bucketName = process.env.AWS_BUCKET_NAME
@@ -43,6 +44,7 @@ app.set('view engine', 'html');
 
 // --- ROUTING
 app.get('/', function (request, response) {
+	console.log("STarted");
 	response.render('index.html');
 });
 
@@ -88,6 +90,23 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 	});
 
 	const data = JSON.parse(request.body.data);
+	const stringifiedData = data.map(obj => {
+		const newObj = {};
+		for (const key in obj) {
+			if (typeof obj[key] === 'object') {
+				newObj[key] = JSON.stringify(obj[key]); // Convert object value to a string
+			} else {
+				newObj[key] = obj[key];
+			}
+		}
+		return newObj;
+	});
+
+	console.log(stringifiedData);
+
+	// data = stringifiedData;
+
+	data[0]['response'] = stringifiedData[0]['response'];
 
 	csvWriter.writeRecords(data)
 		.then(() => {
