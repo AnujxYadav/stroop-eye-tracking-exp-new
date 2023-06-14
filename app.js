@@ -102,11 +102,21 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 		return newObj;
 	});
 
-	console.log(stringifiedData);
+	// console.log(stringifiedData);
+
+	for (let i = 0; i < data.length; i++) {
+		// check if trial_type exists in data[i]
+		if (data[i].hasOwnProperty('trial_type')) {
+			if (data[i]['trial_type'] == 'survey-likert' || data[i]['trial_type'] == 'survey-text') {
+				data[i]['response'] = JSON.stringify(data[i]['response'])
+			}
+		}
+	}
 
 	// data = stringifiedData;
 
-	data[0]['response'] = stringifiedData[0]['response'];
+	// data[0]['response'] = stringifiedData[0]['response'];
+	data[2]['response'] = JSON.stringify(data[2]['response'])
 
 	csvWriter.writeRecords(data)
 		.then(() => {
@@ -187,19 +197,19 @@ app.get('/report', function (request, response) {
 
 
 
-const options = {
-	key: fs.readFileSync('/etc/letsencrypt/live/engageme.hmi.iiitd.edu.in/privkey.pem'),
-	cert: fs.readFileSync('/etc/letsencrypt/live/engageme.hmi.iiitd.edu.in/fullchain.pem'),
-}
+// const options = {
+// 	key: fs.readFileSync('/etc/letsencrypt/live/engageme.hmi.iiitd.edu.in/privkey.pem'),
+// 	cert: fs.readFileSync('/etc/letsencrypt/live/engageme.hmi.iiitd.edu.in/fullchain.pem'),
+// }
 
 
 // --- START THE SERVER 
-// var server = app.listen(process.env.PORT || 3000, function () {
-// 	console.log("Listening on port %d", server.address().port);
-// });
+var server = app.listen(process.env.PORT || 3000, function () {
+	console.log("Listening on port %d", server.address().port);
+});
 
 // use the following for https server
-var server = require('https').createServer(options, app).listen(3000, function () {
-	console.log("Listening on port id %d", server.address().port);
-}
-);
+// var server = require('https').createServer(options, app).listen(3000, function () {
+// 	console.log("Listening on port id %d", server.address().port);
+// }
+// );
