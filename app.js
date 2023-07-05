@@ -34,7 +34,7 @@ app.use('/jspsych', express.static(__dirname + "/jspsych"));
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: false }));
 
-console.log(__dirname);
+// console.log(__dirname);
 
 // --- VIEW LOCATION, SET UP SERVING STATIC HTML
 app.set('views', __dirname + '/public/views');
@@ -44,7 +44,7 @@ app.set('view engine', 'html');
 
 // --- ROUTING
 app.get('/', function (request, response) {
-	console.log("STarted");
+	// console.log("Started");
 	response.render('index.html');
 });
 
@@ -57,8 +57,9 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 	data_dict['stroop_acc'] = request.body.stroop_score;
 	data_dict['cpt_acc'] = request.body.cpt_score;
 	data_dict['tmt_acc'] = request.body.tmt_score;
-	console.log(data_dict);
 
+	// console.log(request.body.data);
+	
 	//response.status(201).send({success:true});
 	const csvWriter = createCsvWriter({
 		path: 'data/' + request.body.subject_id + '.csv',
@@ -90,6 +91,8 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 	});
 
 	const data = JSON.parse(request.body.data);
+	// // console.log(data);
+
 	const stringifiedData = data.map(obj => {
 		const newObj = {};
 		for (const key in obj) {
@@ -102,7 +105,7 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 		return newObj;
 	});
 
-	// console.log(stringifiedData);
+	// // console.log(stringifiedData);
 
 	for (let i = 0; i < data.length; i++) {
 		// check if trial_type exists in data[i]
@@ -120,33 +123,33 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 
 	csvWriter.writeRecords(data)
 		.then(() => {
-			console.log('sending Data');
+			// console.log('sending Data');
 		});
 	const path = 'data/' + request.body.subject_id + '.csv';
 	const result = await uploadFile(data, path, request.body.subject_id + 'data.csv')
 	await unlinkFile(path)
-	console.log(result)
+	// console.log(result)
 	const description = request.body.description
 	response.status(201).send({ success: true });
 
 });
 
 app.post('/video_data', upload.single('file'), async (req, res) => {
-	console.log(req.file.path);
-	// console.log("CHECK1");
+	// console.log(req.file.path);
+	// // console.log("CHECK1");
 	// const result = await uploadFile(req.file,req.file.path,req.file.filename)
 	// await unlinkFile(req.file.path)
 
 	// save the file to the local file system
 	// generate a random name for the file
-	console.log(req.body.fname);
+	// console.log(req.body.fname);
 	const fileName = Math.random().toString(36).substring(7);
-	console.log(fileName);
+	// console.log(fileName);
 	filename = req.body.fname + '.mp4';
 	const result = await uploadFile(req.file, req.file.path, filename)
 
-	console.log("CHECK2");
-	console.log(result)
+	// console.log("CHECK2");
+	// console.log(result)
 	const description = req.body.description
 	res.status(200).send({ success: true });
 });
@@ -178,7 +181,7 @@ app.post('/email', function (request, response) {
 		//success
 		requests(options, (err, responses, body) => {
 			if (err) {
-				console.log(err);
+				// console.log(err);
 				response.json({ error: err })
 			} else {
 				response.status(200).send({ message: "success" });
@@ -197,19 +200,19 @@ app.get('/report', function (request, response) {
 
 
 
-// const options = {
-// 	key: fs.readFileSync('/etc/letsencrypt/live/engageme.hmi.iiitd.edu.in/privkey.pem'),
-// 	cert: fs.readFileSync('/etc/letsencrypt/live/engageme.hmi.iiitd.edu.in/fullchain.pem'),
-// }
+const options = {
+	key: fs.readFileSync('/etc/letsencrypt/live/engageme.hmi.iiitd.edu.in/privkey.pem'),
+	cert: fs.readFileSync('/etc/letsencrypt/live/engageme.hmi.iiitd.edu.in/fullchain.pem'),
+}
 
 
 // --- START THE SERVER 
-var server = app.listen(process.env.PORT || 3000, function () {
-	console.log("Listening on port %d", server.address().port);
-});
+// var server = app.listen(process.env.PORT || 3000, function () {
+// 	// console.log("Listening on port %d", server.address().port);
+// });
 
 // use the following for https server
-// var server = require('https').createServer(options, app).listen(3000, function () {
-// 	console.log("Listening on port id %d", server.address().port);
-// }
-// );
+var server = require('https').createServer(options, app).listen(3000, function () {
+	// console.log("Listening on port id %d", server.address().port);
+}
+);
