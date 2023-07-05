@@ -57,13 +57,10 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 	data_dict['stroop_acc'] = request.body.stroop_score;
 	data_dict['cpt_acc'] = request.body.cpt_score;
 	data_dict['tmt_acc'] = request.body.tmt_score;
+	console.log(data_dict);
 
-	// console.log(request.body.data);
-	
-	//response.status(201).send({success:true});
 	const csvWriter = createCsvWriter({
 		path: 'data/' + request.body.subject_id + '.csv',
-
 		header: [
 			{ id: 'success', title: 'success' },
 			{ id: 'trial_type', title: 'trial_type' },
@@ -91,47 +88,53 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 	});
 
 	const data = JSON.parse(request.body.data);
-	// // console.log(data);
-
-	const stringifiedData = data.map(obj => {
-		const newObj = {};
-		for (const key in obj) {
-			if (typeof obj[key] === 'object') {
-				newObj[key] = JSON.stringify(obj[key]); // Convert object value to a string
-			} else {
-				newObj[key] = obj[key];
-			}
-		}
-		return newObj;
-	});
-
-	// // console.log(stringifiedData);
+	const idArray = [
+		'success',
+		'trial_type',
+		'trial_index',
+		'time_elapsed',
+		'internal_node_id',
+		'subject',
+		'rt',
+		'stimulus',
+		'response',
+		'load_time',
+		'raw_gaze',
+		'percent_in_roi',
+		'average_offset',
+		'validation_points',
+		'samples_per_sec',
+		'view_history',
+		'type',
+		'Congruency',
+		'letter',
+		'webgazer_data',
+		'webgazer_targets',
+		'correct'
+	];
 
 	for (let i = 0; i < data.length; i++) {
-		// check if trial_type exists in data[i]
-		if (data[i].hasOwnProperty('trial_type')) {
-			if (data[i]['trial_type'] == 'survey-likert' || data[i]['trial_type'] == 'survey-text') {
-				data[i]['response'] = JSON.stringify(data[i]['response'])
+		for (let j = 0; j < idArray.length; j++) {
+			if (data[i].hasOwnProperty(idArray[j])) {
+				// If it contains nested objects then stringify it
+				if (typeof data[i][idArray[j]] === 'object') {
+					data[i][idArray[j]] = JSON.stringify(data[i][idArray[j]]);
+				}
 			}
 		}
 	}
 
-	// data = stringifiedData;
-
-	// data[0]['response'] = stringifiedData[0]['response'];
-	data[2]['response'] = JSON.stringify(data[2]['response'])
-
 	csvWriter.writeRecords(data)
 		.then(() => {
-			// console.log('sending Data');
+			console.log('Sending Data');
 		});
-	const path = 'data/' + request.body.subject_id + '.csv';
-	const result = await uploadFile(data, path, request.body.subject_id + 'data.csv')
-	await unlinkFile(path)
-	// console.log(result)
-	const description = request.body.description
-	response.status(201).send({ success: true });
 
+	const path = 'data/' + request.body.subject_id + '.csv';
+	const result = await uploadFile(data, path, request.body.subject_id + 'data.csv');
+	await unlinkFile(path);
+	console.log(result);
+	const description = request.body.description;
+	response.status(201).send({ success: true });
 });
 
 app.post('/video_data', upload.single('file'), async (req, res) => {
