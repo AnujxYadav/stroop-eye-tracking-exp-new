@@ -133,7 +133,6 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 	const result = await uploadFile(data, path, request.body.subject_id + 'data.csv');
 	await unlinkFile(path);
 	console.log(result);
-	const description = request.body.description;
 	response.status(201).send({ success: true });
 });
 
