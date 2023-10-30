@@ -13,6 +13,7 @@
     <script src="../../jspsych/jspsych.js"></script>
     <script src="../../jspsych/plugins/jspsych-html-keyboard-response.js"></script>
     <script src="../../jspsych/plugins/jspsych-image-keyboard-response.js"></script>
+    <script src="../../jspsych/plugins/jspsych-audio-keyboard-response.js"></script>
     <script src="../../jspsych/plugins/jspsych-fullscreen.js"></script>
     <script src="../../jspsych/plugins/jspsych-html-button-response.js"></script>
     <script src="../../jspsych/plugins/jspsych-instructions.js"></script>
@@ -171,6 +172,7 @@
       fullscreen_mode: true,
     });
     timeline.push(overview);
+
     timeline.push(likert_page);
     var val = {
       timeline: [validation],
@@ -189,9 +191,6 @@
     timeline.push(val);
     timeline.push(validation_instructions);
     timeline.push(validate);
-
-
-
 
     var preload = {
       type: 'preload',
@@ -268,6 +267,8 @@
         '</div>',
       choices: jsPsych.ALL_KEYS
     }
+
+
 
     var min_divWidth = -1000
     var max_divWidth = 1000
@@ -501,7 +502,7 @@
     // // decide if the person did well enough 
     timeline.push(if_node);
     // // decide if the person did well enough 
-    timeline.push(if_node);
+    // timeline.push(if_node);
     // // Present test instructions  
     timeline.push(ColorWordTestInstr);
     // // run the test 
@@ -859,6 +860,7 @@
           var max_divWidth = 1000
           var min_divHeight = -380
           var max_divHeight = 380
+          var startstime;
           var n_back_trial = {
             type: 'html-keyboard-response',
             stimulus: function () {
@@ -911,6 +913,8 @@
               if (data.match == false) {
                 data.correct = (data.response === null)
               }
+              startstime = new Date();
+              console.log(startstime);
             }
           }
           var n_back_trials = [
@@ -948,7 +952,243 @@
           }
           timeline.push(feedback);
 
+          // ------------- FOCUSSED ATTENTION TASK START --------------
+          var fixedFlankerStimuli = ['<<<<<<', '>>>>>>', '<<><<', '>>><>', '><<>>', '<><><'];
+          var flankerStimuli = ['<<<<<<', '>>>>>>', '<<><<', '>>><>', '><<>>', '<><><'];
+          var correct_responses = ['<', '>', '>', '>', '<', '<'];
+          var seq = [];
+          var congruentCorr = 0;
+          var incongruentCorr = 0;
+          var congruentTotal = 0;
+          var incongruentTotal = 0;
+          var corrCount = 0;
+          var incorrCount = 0;
+          var FlankerTotal = 0;
 
+          var numbTrials = 15000;
+
+          var flankerTimeline = [];
+
+          for (var i = 0; i < numbTrials; i++) {
+            FlankerTotal++;
+            var stimulus = jsPsych.randomization.sampleWithoutReplacement(flankerStimuli, 1)[0];
+            var correct_response = correct_responses[flankerStimuli.indexOf(stimulus)];
+
+            var flankerTrial = {
+              type: 'html-keyboard-response',
+              stimulus: '<div style="font-size: 60px;">' + stimulus + '</div>',
+              choices: ['<', '>'],
+              on_start: function () {
+                endtimeColour = new Date();
+                console.log("endtimeColour: " + endtimeColour)
+                console.log("starttime: " + startstime)
+                if (endtimeColour - startstime > 5 * 60 * 1000) {
+                  jsPsych.endCurrentTimeline();
+                }
+              },
+              trial_duration: 2000,
+              response_ends_trial: true,
+              data: {
+                correct_response: correct_response,
+                stimulus: stimulus,
+                type: 'flanker',
+                Congruency: stimulus === '<<<<<<' || stimulus === '>>>>>>' ? 'Congruent' : 'Incongruent',
+              },
+              on_finish: function (data) {
+                starttime = new Date();
+                var correct = data.response === data.correct_response;
+                if (data.stimulus === '<<<<<<' || data.stimulus === '>>>>>>') {
+                  congruentTotal++;
+                  if (correct) {
+                    congruentCorr++;
+                  }
+                } else {
+                  incongruentTotal++;
+                  if (correct) {
+                    incongruentCorr++;
+                  }
+                }
+                data.correct = correct;
+                if (correct) {
+                  corrCount++;
+                } else {
+                  incorrCount++;
+                }
+              },
+            };
+
+            flankerTimeline.push(flankerTrial);
+          }
+
+          timeline.push({
+            timeline: flankerTimeline,
+          });
+
+          var summaryTrial = {
+            type: 'html-keyboard-response',
+            stimulus: function () {
+              var totalcounter = corrCount + incorrCount;
+              var html = '<div style="width:800px;">' +
+                '<p>All done!</p>' +
+                '<p>You correctly identified the target ' + corrCount + ' out of ' + totalcounter + ' times.</p>' +
+                '<p>Please press any key to proceed</p>';
+              return html;
+            },
+            choices: jsPsych.ALL_KEYS,
+          };
+
+          timeline.push(summaryTrial);
+
+          // --------- FOCUSSED ATTENTION TASK END -------------
+
+          // --------- DIVIDED ATTENTION TASK START -------------
+          // List of colors and the target color to count
+          var colors = ['red', 'blue', 'green', 'yellow'];
+          var targetColor = 'red'; // Change this to your desired target color
+          var nCount = 0;
+          var correctAudio = 0, correctVisual = 0, correctBoth = 0;
+          var totalAudio = 0, totalVisual = 0, totalBoth = 0;
+
+          var images_set = ['1.png', '2.png', '3.png', '4.png', '5.png', '6.png', '7.png', '8.png', '9.png', '10.png', '11.png', '12.png'];
+          var forms_square = [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0];
+          var sequence = [];
+          var correctCount = 0;
+          var incorrectCount = 0;
+          var totalMatches = 0;
+          var sequence_length = 150;
+
+          var numTrials = 150; // Adjust the number of trials as needed
+
+          var colorTimeline = [];
+          var endtimeColour = undefined;
+          var targetCount = 0; // Initialize target count
+
+          // Create multiple trials
+          for (var i = 0; i < numTrials; i++) {
+            // Shuffle the colors array to present a random order
+            var shuffledColors = jsPsych.randomization.sampleWithoutReplacement(colors, 4);
+
+            // Pick a random color for this trial
+            var currentColor = shuffledColors[0];
+            if (currentColor == targetColor) targetCount++; // Increment target count
+
+            var audioTrial = {
+              type: 'audio-keyboard-response',
+              stimulus: '../../assets/images/' + currentColor + '.mp3', // Specify the correct path to your audio files
+              choices: ['ArrowLeft', 'ArrowRight', 'ArrowDown'],
+              on_start: function () {
+                endtimeColour = new Date();
+                // console.log("endtimeColour: " + endtimeColour)
+                // console.log("starttime: " + starttime)
+                // if (endtimeColour - starttime > 5 * 60 * 1000) {
+                //   jsPsych.endCurrentTimeline();
+                // }
+              },
+
+              prompt: () => {
+                var imageIndex = jsPsych.randomization.sampleWithoutReplacement([...Array(images_set.length).keys()], 1)[0];
+                var image = images_set[imageIndex];
+                var hasSquare = forms_square[imageIndex];
+
+                // Record the match condition
+                var match = hasSquare ? 1 : 0;
+                totalMatches += match;
+
+                sequence.push({ image: image, match: match });
+
+                // Return the path to the image
+                // return '../../assets/images/' + image;
+
+                // wrire a html to show the image
+                var html = '<div style="width:800px;">' +
+                  '<img src="../../assets/images/' + image + '" alt="image" width="500" height="500">' +
+                  '</div>';
+                return html;
+              },
+              // choices: jsPsych.NO_KEYS, // User won't respond with keys
+              trial_duration: 2000, // Adjust the duration as needed
+              response_ends_trial: false, // Continue to the next trial automatically
+
+              extensions: [
+                {
+                  type: "webgazer",
+                  params: {
+                    targets: ["#jspsych-audio-keyboard-response-stimulus"],
+                  },
+                },
+              ],
+
+              on_finish: createFinishFunction(currentColor),
+            };
+            timeline.push(audioTrial);
+          }
+
+          function createFinishFunction (currentColor) {
+            return function (data) {
+              var isBPressed = data.response == 'arrowleft' && currentColor == targetColor;
+              var lastTrial = sequence[sequence.length - 1];
+              var isCorrect = data.response == 'arrowright' && lastTrial.match == 1;
+              var isIncorrect = data.response == 'arrowright' && lastTrial.match == 0;
+              console.log("Target Color : " + targetColor)
+              console.log("Color : " + currentColor)
+              var isNPressed = data.response == 'arrowdown' && currentColor == targetColor && lastTrial.match == 1;
+
+              if (currentColor == targetColor && lastTrial.match == 1) {
+                totalBoth++;
+              }
+              else if (currentColor == targetColor) {
+                totalAudio++;
+              } else if (lastTrial.match == 1) {
+                totalVisual++;
+              }
+
+              if (isNPressed) {
+                nCount++;
+                correctCount++;
+                correctBoth++;
+              }
+
+              if (isBPressed) {
+                nCount++;
+                correctAudio++;
+              }
+
+              if (isCorrect) {
+                correctVisual++;
+                correctCount++;
+              } else if (isIncorrect) {
+                incorrectCount++;
+              }
+
+              console.log("correct count:" + correctCount);
+              console.log("incorrect count:" + incorrectCount);
+              console.log("total matches:" + totalMatches);
+
+              data.correct = isCorrect;
+            };
+          }
+
+          // Add the color timeline to the main timeline
+          timeline.push({
+            timeline: colorTimeline,
+          });
+
+          // Create a summary trial to show the count of target color appearances
+          var summaryTrial = {
+            type: 'html-keyboard-response',
+            stimulus: function () {
+              var html = '<div style="width:800px;">' +
+                '<p>All done!</p>' +
+                '<p>You correctly pressed identified the target colour ' + nCount + ' out of ' + targetCount + ' times.</p>' +
+                "<p>You correctly pressed identified the squares " + correctCount + " out of " + totalMatches + " times.</p>" +
+                '<p>Please press any key to proceed</p>';
+              return html;
+            },
+            choices: jsPsych.ALL_KEYS,
+          };
+
+          timeline.push(summaryTrial);
+          // --------- DIVIVDED ATTENTION TASK END -------------    
 
           //////////////////////////////////////////////////////////
 
@@ -1383,12 +1623,46 @@
               } else {                                                                     // Slab 6
                 TMT_score = 99;
               }
+
+              var flankerObject = jsPsych.data.get().filter({ type: 'flanker' });
+              var flankertotalcount = flankerObject.count();
+              console.log(flankertotalcount)
+              var FlankerCorrect = flankerObject.filter({ correct: true }).count();
+
+              var FlankerAccuracy = Math.round(FlankerCorrect / flankertotalcount * 100);
+
+
+
+              console.log("Flanker Report");
+              console.log(FlankerCorrect)
+              console.log(flankertotalcount)
+              console.log(FlankerAccuracy)
+
+              var audioAcc = 0, visualAcc = 0, bothAcc = 0;
+
+              console.log(totalAudio, totalVisual, totalBoth);
+
+              if (totalAudio != 0) audioAcc = correctAudio / totalAudio * 100;
+              if (totalVisual != 0) visualAcc = correctVisual / totalVisual * 100;
+              if (totalBoth != 0) bothAcc = correctBoth / totalBoth * 100;
+
+              var avgAcc = 0, totalTasks = 0;
+              if (totalAudio != 0) totalTasks++;
+              if (totalVisual != 0) totalTasks++;
+              if (totalBoth != 0) totalTasks++;
+
+              var avgAcc = (audioAcc + visualAcc + bothAcc) / totalTasks;
+
+              avgAcc = Math.round(avgAcc);
+
               var data = {
                 columns: jsPsych.data.get().uniqueNames(),
                 subject_id: jsPsych.data.get().select('subject').values[0],
                 stroop_score: Stroop_score,
                 cpt_score: CPT_score,
                 tmt_score: TMT_score,
+                flanker_score: FlankerAccuracy,
+                dual_task_score: avgAcc,
                 data: jsPsych.data.get().json()
               };
 

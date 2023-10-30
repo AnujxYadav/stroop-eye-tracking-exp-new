@@ -57,6 +57,8 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 	data_dict['stroop_acc'] = request.body.stroop_score;
 	data_dict['cpt_acc'] = request.body.cpt_score;
 	data_dict['tmt_acc'] = request.body.tmt_score;
+	data_dict['flank_acc'] = request.body.flanker_score;
+	data_dict['dual_task_acc'] = request.body.dual_task_score;
 	console.log(data_dict);
 
 	const csvWriter = createCsvWriter({
@@ -196,7 +198,7 @@ app.post('/email', function (request, response) {
 });
 
 app.get('/report', function (request, response) {
-	response.render('report_updated.html', { stroop_score: data_dict['stroop_acc'], cpt_score: data_dict['cpt_acc'], tmt_score: data_dict['tmt_acc'] })
+	response.render('report_updated.html', { stroop_score: data_dict['stroop_acc'], cpt_score: data_dict['cpt_acc'], tmt_score: data_dict['tmt_acc'], flanker_score: data_dict['flank_acc'], dual_task_score: data_dict['dual_task_acc'] })
 });
 
 
