@@ -118,7 +118,8 @@
         username = subject_id;
         // console.log(subject_id)
         jsPsych.data.addProperties({
-          subject: subject_id
+          subject: subject_id,
+          start_time: new Date().toLocaleString()
         });
 
       }
@@ -1658,6 +1659,7 @@
               var data = {
                 columns: jsPsych.data.get().uniqueNames(),
                 subject_id: jsPsych.data.get().select('subject').values[0],
+                start_time: jsPsych.data.get().select('start_time').values[0],
                 stroop_score: Stroop_score,
                 cpt_score: CPT_score,
                 tmt_score: TMT_score,

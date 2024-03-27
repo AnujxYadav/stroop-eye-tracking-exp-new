@@ -59,6 +59,7 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 	data_dict['tmt_acc'] = request.body.tmt_score;
 	data_dict['flank_acc'] = request.body.flanker_score;
 	data_dict['dual_task_acc'] = request.body.dual_task_score;
+	data_dict['start_time'] = request.body.start_time;
 	console.log(data_dict);
 
 	const csvWriter = createCsvWriter({
@@ -68,6 +69,7 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 			{ id: 'trial_type', title: 'trial_type' },
 			{ id: 'trial_index', title: 'trial_index' },
 			{ id: 'time_elapsed', title: 'time_elapsed' },
+			{ id: 'start_time', title: 'start_time' },
 			{ id: 'internal_node_id', title: 'internal_node_id' },
 			{ id: 'subject', title: 'subject' },
 			{ id: 'rt', title: 'rt' },
@@ -95,6 +97,7 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 		'trial_type',
 		'trial_index',
 		'time_elapsed',
+		'start_time',
 		'internal_node_id',
 		'subject',
 		'rt',
@@ -125,6 +128,42 @@ app.post('/save_data', upload.single('data'), async (request, response) => {
 			}
 		}
 	}
+
+	let elapsed_time_at_trial_index_4 = data[3].time_elapsed;
+
+	for (let i = 0; i < data.length; i++) {
+		// extract time from start_time
+		let time = data[i].start_time;
+		let time_split = time.split(" ");
+		let time_split1 = time_split[1].split(":");
+		let hr = parseInt(time_split1[0]);
+		let min = parseInt(time_split1[1]);
+		let sec = parseInt(time_split1[2]);
+
+		// I have elapsed time in miliseconds as integers (eg. 21011) and I want to add it to the time
+		let elapsed_time = data[i].time_elapsed;
+
+		let elapsed_hr = Math.floor((elapsed_time - elapsed_time_at_trial_index_4) / 3600000);
+		let elapsed_min = Math.floor(((elapsed_time - elapsed_time_at_trial_index_4) % 3600000) / 60000);
+		let elapsed_sec = Math.floor(((elapsed_time - elapsed_time_at_trial_index_4) % 60000) / 1000);
+
+		let new_hr = hr + elapsed_hr;
+		let new_min = min + elapsed_min;
+		let new_sec = sec + elapsed_sec;
+
+		if (new_sec >= 60) {
+			new_min += Math.floor(new_sec / 60);
+			new_sec = new_sec % 60;
+		}
+		if (new_min >= 60) {
+			new_hr += Math.floor(new_min / 60);
+			new_min = new_min % 60;
+		}
+
+		data[i].start_time = time_split[0] + " " + new_hr + ":" + new_min + ":" + new_sec;
+	}
+
+	// console.log("Hello")
 
 	csvWriter.writeRecords(data)
 		.then(() => {
